@@ -56,7 +56,6 @@ func (wf *wfResolver) genLinks(user *pb.UsersEntry) []webfinger.Link {
 	}
 
 	//TODO(iandioch): Add magic-public-key webfinger links.
-	//TODO(sailslick): Add atom/rss feeds webfinger links.
 	html := webfinger.Link{
 		HRef: fmt.Sprintf("%s://%s/#/@%s", protocol, host, user.Handle),
 		Rel:  "http://webfinger.net/rel/profile-page",
@@ -67,7 +66,20 @@ func (wf *wfResolver) genLinks(user *pb.UsersEntry) []webfinger.Link {
 		Rel:  "self",
 		Type: "application/activity+json",
 	}
-	return []webfinger.Link{html, ap}
+	// http://microformats.org/wiki/rel-feed
+	rss := webfinger.Link{
+		HRef: fmt.Sprintf("%s://%s/c2s/%s/rss", protocol, host, user.GlobalId),
+		Rel:  "feed",
+		Type: "application/rss+xml",
+	}
+
+	// http://microformats.org/wiki/rel-alternate
+	altRss := webfinger.Link{
+		HRef: fmt.Sprintf("%s://%s/c2s/%s/rss", protocol, host, user.GlobalId),
+		Rel:  "alternative",
+		Type: "application/rss+xml",
+	}
+	return []webfinger.Link{html, ap, rss, altRss}
 }
 
 // FindUser finds the user given the username and hostname
@@ -97,6 +109,7 @@ func (wf *wfResolver) FindUser(handle string, host, requestHost string, r []webf
 // DummyUser allows us to fake a user, to prevent user enumeration.
 //
 // TODO(devoxel): create realistic fakes rather than 404s
+// See https://github.com/sheenobu/go-webfinger/blob/master/resolver.go
 func (wf *wfResolver) DummyUser(username string, hostname string, r []webfinger.Rel) (*webfinger.Resource, error) {
 	return nil, util.UserNotFoundErr
 }

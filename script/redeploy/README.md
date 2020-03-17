@@ -11,6 +11,7 @@ modify it to work in any fork of Rabble.
 - Ensure the user that run's the script has permissions to restart
   the rabble service without password input. This can be done by editing
   `/etc/sudoers` file using `visudo`.
+  e.g. `rabble ALL = NOPASSWD: /bin/systemctl restart rabble`
 
   See [this StackOverflow question](https://askubuntu.com/a/1012015)
   for inspiration (and make sure to run `whereis systemctl` before using

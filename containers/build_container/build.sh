@@ -6,7 +6,7 @@ if [ -z "$LOCAL_USER_ID" ]
 then
   echo "ERROR: environment variable LOCAL_USER_ID does not exist."
   echo "It is needed to preserve the mounted filesystem."
-  echo "See run_build.sh in the root of the project."
+  echo "See build.sh in the root of the project."
   exit 1
 fi
 

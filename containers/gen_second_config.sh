@@ -17,6 +17,6 @@ export RABBLE_DBPATH="/repo/rabble2.db"
 export RABBLE_EXTERNAL_ADDRESS="skinny_2:1917"
 export RABBLE_INSTANCE_BLACKLIST_FILE="/repo/config/instance_blacklist"
 
-python3 build_out/containers/build_compose.py \
+python3 build_out/containers/compose_builder.py \
   --template="build_out/containers/docker-compose.tmpl.yml" \
   --output="build_out/containers/second.yml"

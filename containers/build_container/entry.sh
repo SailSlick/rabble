@@ -5,9 +5,9 @@ set -e
 export LOCAL_USER_ID
 export TEST_RABBLE
 
-/repo/build_container/build.sh
+/repo/containers/build_container/build.sh
 
 if [ -n "${TEST_RABBLE}" ]
 then
-  /repo/build_container/test.sh
+  /repo/containers/build_container/test.sh
 fi

@@ -8,14 +8,14 @@ The only requirement to build Rabble is to have docker installed.
 
 ### Steps
 
-Run `run_build.sh` and the output binaries will be written to a `build_out`
+Run `build.sh` and the output binaries will be written to a `build_out`
 directory.
 
 ### Configuration
 
 There are a few parameters you can use to configure your Rabble instance.
 To change these options set the corresponding environment variable when running
-`run_build.sh`. Unset values have sensible defaults.
+`build.sh`. Unset values have sensible defaults.
 
  - `RABBLE_SEARCH_TYPE`:
    - bleve (default)
@@ -41,8 +41,8 @@ context directory changes. To manually rebuild run
 ## Adding a new microservice to the build
 
 To add a new microservice follow these steps:
- - Add new build dependencies (compilers, libraries, ...) to `build_container/Dockerfile`
- - Add the build commands to `build_container/build.sh`
+ - Add new build dependencies (compilers, libraries, ...) to `containers/build_container/Dockerfile`
+ - Add the build commands to `containers/build_container/build.sh`
  - Create a Dockerfile in the microservice's directory that runs the microservice
  - Add the new service to `docker-compose.yml`
  - Test!

@@ -20,5 +20,5 @@ git checkout $_BRANCH
 # certain string is in the commit diff
 git rebase master
 
-$REPO_ROOT/run_build.sh
+$REPO_ROOT/build.sh
 sudo systemctl restart $_SERVICE

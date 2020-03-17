@@ -2,8 +2,8 @@
 """
 gengraph creates a directed graph of Rabble's GRPC service using graphviz.
 
-gengraph should be run from the root of the rabble project directory, and requires
-the python3 yaml & graphviz packages.
+gengraph should be run from the root of the rabble project directory, and
+requires the python3 yaml & graphviz packages.
 
 It writes generated files to the gengraph directory:
     - graph_output.gv: the graphviz source.
@@ -15,6 +15,10 @@ variable in the top of the file. See https://graphviz.org for more details.
 To render all versions, set ENGINE to "all".
 To render none, set ENGINE to "".
 """
+from graphviz import Digraph
+import yaml
+from collections import defaultdict
+import subprocess
 ENGINE = "all"
 
 # dot - "hierarchical"
@@ -25,11 +29,6 @@ ENGINE = "all"
 # circo - circular layout
 ALL_ENGINES = ["dot", "neato", "fdp", "sfdp", "twopi", "circo"]
 
-import subprocess
-from collections import defaultdict
-
-import yaml
-from graphviz import Digraph
 
 def get_env_mappings():
     with open("build_out/containers/first.yml") as f:
@@ -45,6 +44,7 @@ def get_env_mappings():
             if 'SERVICE_HOST' in h:
                 mappings[service].append(r)
     return mappings
+
 
 def render(envs, engine, use_engine_path=False):
     dot = Digraph(comment='Rabble Services', engine=engine)
@@ -63,6 +63,7 @@ def render(envs, engine, use_engine_path=False):
 
     return dot
 
+
 def main():
     envs = get_env_mappings()
 
@@ -73,6 +74,7 @@ def main():
 
     for engine in ALL_ENGINES:
         render(envs, engine, use_engine_path=True)
+
 
 if __name__ == "__main__":
     main()

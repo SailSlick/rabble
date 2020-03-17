@@ -1,6 +1,7 @@
 import unittest
 
-from build_compose import replace_vars
+from compose_builder import replace_vars
+
 
 class BuildComposeTest(unittest.TestCase):
     def setUp(self):
@@ -27,5 +28,3 @@ class BuildComposeTest(unittest.TestCase):
     def test_missing_var(self):
         with self.assertRaises(ValueError):
             replace_vars("this = [[A]]", {})
-
-

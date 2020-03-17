@@ -1,7 +1,7 @@
 import argparse
 import os
 import re
-import sys
+
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -10,11 +10,13 @@ def get_args():
     parser.add_argument("--output", default="build_out/docker-compose.yml")
     return parser.parse_args()
 
+
 def read_template(path):
     f = open(path)
     config = f.read()
     f.close()
     return config
+
 
 def replace_vars(config, environ):
     pattern = re.compile(r"\[\[(.+?)\]\]")  # Matches: [[something]]
@@ -29,10 +31,12 @@ def replace_vars(config, environ):
         config = config.replace(var, value)
     return config
 
+
 def write_config(config, path):
     f = open(path, "w")
     f.write(config)
     f.close()
+
 
 def main():
     args = get_args()
@@ -41,6 +45,6 @@ def main():
     out_config = replace_vars(config, os.environ)
     write_config(out_config, args.output)
 
+
 if __name__ == '__main__':
     main()
-

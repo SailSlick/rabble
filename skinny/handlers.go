@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	pb "github.com/cpssd/rabble/services/proto"
-	util "github.com/cpssd/rabble/services/utils"
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	wrapperpb "github.com/golang/protobuf/ptypes/wrappers"
@@ -228,41 +226,6 @@ func (s *serverWrapper) handleRssPerUser() http.HandlerFunc {
 	}
 }
 
-func (s *serverWrapper) handleUserCSS() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		v := mux.Vars(r)
-		strUserID, ok := v["userId"]
-		if !ok || strUserID == "" {
-			log.Printf("Could not parse userId from url in UserCss\n")
-			w.WriteHeader(http.StatusBadRequest) // Bad Request.
-			return
-		}
-		userID, err := strconv.ParseInt(strUserID, 10, 64)
-		if err != nil {
-			log.Printf("Could not convert userId to int64: id(%v)\n", strUserID)
-			w.WriteHeader(http.StatusBadRequest) // Bad Request.
-			return
-		}
-		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeoutDuration)
-		defer cancel()
-		resp, err := s.users.GetCss(ctx, &pb.GetCssRequest{
-			UserId: userID,
-		})
-		if err != nil {
-			log.Printf("Error in users.GetCss: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		} else if resp.Result != pb.GetCssResponse_OK {
-			log.Printf("Error getting css: %s", resp.Error)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "text/css")
-		fmt.Fprintf(w, resp.Css)
-		return
-	}
-}
-
 func (s *serverWrapper) handlePerArticlePage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeoutDuration)
@@ -320,23 +283,12 @@ func (s *serverWrapper) handleNotImplemented() http.HandlerFunc {
 	}
 }
 
-func (s *serverWrapper) getIndexFile() []byte {
-	// This flag is used in "go test", so we can use that to check if we're
-	// in a test.
-	if flag.Lookup("test.v") != nil {
-		return []byte("testing html")
-	}
-
+func (s *serverWrapper) handleIndex() http.HandlerFunc {
 	indexPath := path.Join(staticAssets, "index.html")
 	b, err := ioutil.ReadFile(indexPath)
 	if err != nil {
 		log.Fatalf("could not find index.html: %v", err)
 	}
-	return b
-}
-
-func (s *serverWrapper) handleIndex() http.HandlerFunc {
-	b := s.getIndexFile()
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write(b)
 		if err != nil {
@@ -1033,64 +985,6 @@ func (s *serverWrapper) handleSearch() http.HandlerFunc {
 		err = enc.Encode(body)
 		if err != nil {
 			log.Printf("Could not marshal recommended follows: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-}
-
-func (s *serverWrapper) handleUserDetails() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		v := mux.Vars(r)
-		username, ok := v["username"]
-		if !ok || username == "" {
-			w.WriteHeader(http.StatusBadRequest) // Bad Request.
-			return
-		}
-
-		handle, host, err := util.ParseUsername(username)
-		if err != nil {
-			log.Printf("got bad username: %s", username)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		ur := &pb.UsersRequest{
-			RequestType: pb.UsersRequest_FIND,
-			Match: &pb.UsersEntry{
-				Handle:     handle,
-				Host:       util.NormaliseHost(host),
-				HostIsNull: host == "",
-			},
-		}
-
-		// uid = 0 if no user is logged in.
-		if uid, _ := s.getSessionGlobalID(r); uid != 0 {
-			ur.UserGlobalId = &wrapperpb.Int64Value{Value: uid}
-		}
-
-		log.Printf("Sending request for user: @%s@%s", ur.Match.Handle, ur.Match.Host)
-
-		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeoutDuration)
-		defer cancel()
-		resp, err := s.database.Users(ctx, ur)
-		if err != nil {
-			log.Printf("could not get user, error: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		} else if len(resp.Results) != 1 {
-			log.Printf("could not get user, got %v results", len(resp.Results))
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		enc := json.NewEncoder(w)
-		enc.SetEscapeHTML(false)
-		err = enc.Encode(util.StripUser(resp.Results[0]))
-		if err != nil {
-			log.Printf("could not marshal blogs: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

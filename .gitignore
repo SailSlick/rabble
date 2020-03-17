@@ -63,3 +63,6 @@ research/.ipynb_checkpoints/*
 research/datasets/ml-latest-small*
 # gengraph output
 script/gengraph/graph_output*
+
+# private notes
+notes.md

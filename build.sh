@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -e
 
-# run_build.sh builds all of docker's build using the build_container.
+# build.sh builds all of docker's build using the build_container.
 # if _TEST_RABBLE is set, then it also runs the test script.
 
 docker_tag_exists() {
@@ -23,7 +23,7 @@ rm -rf $BUILD_OUT
 mkdir $BUILD_OUT
 
 
-DOCKERFILE="$REPO_ROOT/build_container/Dockerfile"
+DOCKERFILE="$REPO_ROOT/containers/build_container/Dockerfile"
 DOCKERFILE_HASH="$(shasum $DOCKERFILE | head -c 40)"
 IMAGE="rabblenetwork/rabble_build"
 IMAGE_NAME="$IMAGE:$DOCKERFILE_HASH"
@@ -40,7 +40,7 @@ if ! docker pull $IMAGE_NAME; then
     --tag $IMAGE_NAME \
     --tag rabblenetwork/rabble_build:latest \
     --file $DOCKERFILE \
-    $REPO_ROOT/build_container
+    $REPO_ROOT/containers/build_container
   if [ -z "$DOCKER_PASS" ]; then
     echo "Password for docker hub not given, continuing"
   else

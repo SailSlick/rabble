@@ -7,12 +7,12 @@ jobs:
       # The language doesn't really matter, this is only used to make
       # our container.
       - image: circleci/python:3.6.4
-      
+
     steps:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: false  # Would be great, costs money.
-      - run: './run_build.sh --only-image'
+      - run: './build.sh --only-image'
 
   run_tests:
     docker:
@@ -23,7 +23,7 @@ jobs:
     steps:
       - checkout:
           path: '/repo'
-      - run: '/repo/build_container/entry.sh'
+      - run: '/repo/containers/build_container/entry.sh'
 
 workflows:
   version: 2
@@ -33,4 +33,3 @@ workflows:
       - run_tests:
           requires:
             - push_build_container
-
