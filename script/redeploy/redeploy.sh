@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e
 
 # Set _BRANCH to the branch you'd like keep updated to master.
