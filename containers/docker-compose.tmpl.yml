@@ -200,6 +200,7 @@ services:
       - [[NETWORK_NAME]]
       - default
     environment:
+      - HOST_NAME=[[EXTERNAL_ADDRESS]]
       - DB_SERVICE_HOST=database_service_[[INSTANCE_ID]]
       - LOGGER_SERVICE_HOST=logger_service_[[INSTANCE_ID]]
       - CREATE_SERVICE_HOST=create_service_[[INSTANCE_ID]]

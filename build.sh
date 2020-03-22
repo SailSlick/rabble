@@ -5,7 +5,35 @@ set -e
 # if _TEST_RABBLE is set, then it also runs the test script.
 
 docker_tag_exists() {
-    curl --silent -f -lSL https://index.docker.io/v1/repositories/$1/tags/$2 > /dev/null
+  curl --silent -f -lSL https://index.docker.io/v1/repositories/$1/tags/$2 > /dev/null
+}
+
+# 1=ONLY_IMAGE, 2=IMAGE, 3=DOCKERFILE_DIR,
+docker_pull_or_build() {
+  DOCKERFILE_HASH="$(shasum $3/Dockerfile | head -c 40)"
+  IMAGE_NAME="$2:$DOCKERFILE_HASH"
+  if [ "$1" = "--only-image" ] && docker_tag_exists "$2" "$DOCKERFILE_HASH"; then
+    echo "Docker tag exists, no need to recreate image"
+    exit 0
+  fi
+
+  echo "Attempting to pull $IMAGE_NAME"
+  if ! docker pull $IMAGE_NAME; then
+    echo "Pulling image failed, building"
+    docker build \
+      --tag $IMAGE_NAME \
+      --tag $2:latest \
+      --file $3/Dockerfile \
+      $3
+    if [ -z "$DOCKER_PASS" ]; then
+      echo "Password for docker hub not given, continuing"
+    else
+      docker login -u rabblenetwork -p $DOCKER_PASS
+      echo "Logged in to docker hub, pushing"
+      docker push $IMAGE_NAME
+      docker push $1:latest
+    fi
+  fi
 }
 
 USER_ID=`id -u $USER`
@@ -23,33 +51,14 @@ rm -rf $BUILD_OUT
 mkdir $BUILD_OUT
 
 
-DOCKERFILE="$REPO_ROOT/containers/build_container/Dockerfile"
-DOCKERFILE_HASH="$(shasum $DOCKERFILE | head -c 40)"
+IMAGE="rabblenetwork/rabble_base"
+DOCKERFILE_DIR="$REPO_ROOT/containers/base"
+docker_pull_or_build "$1" "$IMAGE" "$DOCKERFILE_DIR"
+
+
 IMAGE="rabblenetwork/rabble_build"
-IMAGE_NAME="$IMAGE:$DOCKERFILE_HASH"
-
-if [ "$1" = "--only-image" ] && docker_tag_exists "$IMAGE" "$DOCKERFILE_HASH"; then
-  echo "Docker tag exists, no need to recreate image"
-  exit 0
-fi
-
-echo "Attempting to pull $IMAGE_NAME"
-if ! docker pull $IMAGE_NAME; then
-  echo "Pulling image failed, building"
-  docker build \
-    --tag $IMAGE_NAME \
-    --tag rabblenetwork/rabble_build:latest \
-    --file $DOCKERFILE \
-    $REPO_ROOT/containers/build_container
-  if [ -z "$DOCKER_PASS" ]; then
-    echo "Password for docker hub not given, continuing"
-  else
-    docker login -u rabblenetwork -p $DOCKER_PASS
-    echo "Logged in to docker hub, pushing"
-    docker push $IMAGE_NAME
-    docker push rabblenetwork/rabble_build:latest
-  fi
-fi
+DOCKERFILE_DIR="$REPO_ROOT/containers/build_container"
+docker_pull_or_build "$1" "$IMAGE" "$DOCKERFILE_DIR"
 
 if [ "$1" = "--only-image" ]; then
   exit 0
@@ -77,13 +86,13 @@ done
 
 echo "Running build container"
 docker run \
-  --rm -it \
+  --rm \
   --volume $REPO_ROOT:/repo \
   -e LOCAL_USER_ID=$USER_ID \
   -e TEST_RABBLE=$_TEST_RABBLE \
   -e RABBLE_SEARCH_TYPE=$RABBLE_SEARCH_TYPE \
   -e RABBLE_FOLLOW_RECOMMENDER_METHOD="${RABBLE_FOLLOW_RECOMMENDER_METHOD}" \
   -e RABBLE_POSTS_RECOMMENDER_METHOD="${RABBLE_POSTS_RECOMMENDER_METHOD}" \
-  $IMAGE_NAME
+  $IMAGE
 
 echo "Done build"

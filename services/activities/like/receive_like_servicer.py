@@ -1,5 +1,3 @@
-import os
-
 from services.proto import database_pb2 as db_pb
 from services.proto import like_pb2
 from services.proto import recommend_posts_pb2
@@ -7,17 +5,15 @@ from like_util import build_like_activity
 
 
 class ReceiveLikeServicer:
-    def __init__(self, logger, db, user_util, activ_util, post_recommendation_stub=None, hostname=None):
+    def __init__(self, logger, db, user_util, activ_util,
+                 post_recommendation_stub=None, hostname=None):
         self._logger = logger
         self._db = db
         self._user_util = user_util
         self._activ_util = activ_util
         self._post_recommendation_stub = post_recommendation_stub
         # Use the hostname passed in or get it manually
-        self._hostname = hostname if hostname else os.environ.get('HOST_NAME')
-        if not self._hostname:
-            self._logger.error("'HOST_NAME' env var is not set")
-            sys.exit(1)
+        self._hostname = hostname if hostname else self._activ_util._hostname
 
     def _get_liking_user(self, liker_id):
         host, handle, bio = self._user_util.parse_actor_details(liker_id)

@@ -3,8 +3,6 @@ from concurrent import futures
 import argparse
 import grpc
 import time
-import os
-import sys
 
 from utils.connect import get_service_channel
 from utils.logger import get_logger
@@ -49,7 +47,8 @@ def main():
     post_recommendation_stub = recommender_util.get_post_recommendation_stub()
     article_pb2_grpc.add_ArticleServicer_to_server(
         ArticleServicer(create_stub, db_stub, mdc_stub,
-                        search_stub, logger, users_util, post_recommendation_stub),
+                        search_stub, logger, users_util,
+                        post_recommendation_stub),
         server
     )
     server.add_insecure_port('0.0.0.0:1601')

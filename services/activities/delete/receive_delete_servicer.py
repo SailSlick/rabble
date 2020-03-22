@@ -1,10 +1,6 @@
-import os
-import sys
-
 from services.proto import delete_pb2 as dpb
 from utils.articles import delete_article, get_article, get_sharers_of_article
 
-HOSTNAME_ENV = 'HOST_NAME'
 
 class ReceiveDeleteServicer:
     def __init__(self, logger, db, activ_util, users_util, hostname=None):
@@ -12,10 +8,7 @@ class ReceiveDeleteServicer:
         self._db = db
         self._activ_util = activ_util
         self._users_util = users_util
-        self._hostname = hostname if hostname else os.environ.get(HOSTNAME_ENV)
-        if not self._hostname:
-            self._logger.error("Hostname for SendDeleteServicer not set")
-            sys.exit(1)
+        self._hostname = hostname if hostname else self._activ_util._hostname
 
     def ReceiveDeleteActivity(self, req, ctx):
         self._logger.info("Received delete for article '%s'", req.ap_id)
@@ -53,4 +46,3 @@ class ReceiveDeleteServicer:
                 self._logger.warning(
                     "Sending activity to %d followers failed", user_id)
         return dpb.DeleteResponse(result_type=dpb.DeleteResponse.OK)
-

@@ -12,12 +12,14 @@ from requests_http_signature import HTTPSignatureHeaderAuth
 
 class ActivitiesUtil:
     def __init__(self, logger, db):
-        host_name = os.environ.get("HOST_NAME")
-        if not host_name:
-            print("Please set HOST_NAME env variable")
-        self._host_name = host_name
         self._logger = logger
         self._db = db
+
+        host_name = os.environ.get("HOST_NAME")
+        if not host_name:
+            self._logger.error("Please set HOST_NAME env variable")
+            sys.exit(1)
+        self._hostname = host_name
 
     @staticmethod
     def rabble_context():
@@ -40,7 +42,7 @@ class ActivitiesUtil:
         if resp.status_code < 200 or resp.status_code >= 300:
             self._logger.warning(('Non-2xx response code ({}) for webfinger '
                                   + 'lookup for URL: {}').format(resp.status_code,
-                                                               url))
+                                                                 url))
             return None
         return resp.json()
 
@@ -63,7 +65,7 @@ class ActivitiesUtil:
         Fetch the webfinger document for a given user, and return the actor ID
         URL from it.
         """
-        if normalised_host is None or normalised_host == self.normalise_hostname(self._host_name):
+        if normalised_host is None or normalised_host == self.normalise_hostname(self._hostname):
             return self._build_local_actor_url(handle, normalised_host)
         webfinger_doc = self._get_webfinger_document(normalised_host, handle)
         if webfinger_doc is None:
@@ -75,7 +77,7 @@ class ActivitiesUtil:
             return hostname
         if not hostname.startswith('http'):
             old_hostname = hostname
-            if hostname != None and "." not in hostname:
+            if hostname is not None and "." not in hostname:
                 hostname = 'http://' + hostname
             else:
                 hostname = 'https://' + hostname
@@ -118,7 +120,7 @@ class ActivitiesUtil:
         Return the Key ID for the HTTP Signature from the given user object.
         """
         handle = user_obj.handle
-        normalised_host = self.normalise_hostname(self._host_name)
+        normalised_host = self.normalise_hostname(self._hostname)
         return '{}#main-key'.format(self._build_local_actor_url(handle,
                                                                 normalised_host))
 
@@ -130,10 +132,9 @@ class ActivitiesUtil:
           handle.
         - If the given user is foreign, then fetch their Webfinger document and
           extract the actor URL from it.
-        To use this function, the `HOST_NAME` env var should be set.
         """
         normalised_host = self.normalise_hostname(host)
-        if host == self._host_name or host is None:
+        if host == self._hostname or host is None:
             self._logger.info('Building actor for local user')
             return self._build_local_actor_url(handle, normalised_host)
         actor_url = self._get_activitypub_actor_url(normalised_host, handle)
@@ -157,7 +158,7 @@ class ActivitiesUtil:
         # Local article, build ID manually
         normalised_host = self.normalise_hostname(author.host)
         if normalised_host is None or author.host == "":
-            normalised_host = self.normalise_hostname(self._host_name)
+            normalised_host = self.normalise_hostname(self._hostname)
         return f'{normalised_host}/ap/@{author.handle}/{article.global_id}'
 
     def build_local_article_url(self, author, article):
@@ -166,7 +167,7 @@ class ActivitiesUtil:
         article must be a PostEntry proto.
         """
         # Local article, build ID manually
-        normalised_host = self.normalise_hostname(self._host_name)
+        normalised_host = self.normalise_hostname(self._hostname)
         return f'{normalised_host}/#/@{author.handle}/{article.global_id}'
 
     def build_undo(self, obj):
@@ -205,7 +206,7 @@ class ActivitiesUtil:
         if resp.status_code < 200 or resp.status_code >= 300:
             self._logger.warning(('Non-2xx response ({}) when fetching actor '
                                   + 'document at URL "{}"').format(resp.status_code,
-                                                                 actor_url))
+                                                                   actor_url))
             return None
         doc = resp.json()
         return doc
@@ -222,7 +223,7 @@ class ActivitiesUtil:
         if actor_url is None:
             self._logger.warning('Actor URL is None.')
             return None
-        if host is None or host == self._host_name:
+        if host is None or host == self._hostname:
             return '{}/inbox'.format(actor_url)
 
         doc = self.fetch_actor(actor_url)

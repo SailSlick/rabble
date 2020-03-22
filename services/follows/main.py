@@ -2,8 +2,6 @@
 from concurrent import futures
 import argparse
 import grpc
-import os
-import sys
 import time
 
 from utils.connect import get_service_channel

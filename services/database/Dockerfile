@@ -1,12 +1,5 @@
-FROM alpine:3.7
+FROM rabblenetwork/rabble_base
 
-RUN apk add --no-cache --update python3 python3-dev gcc g++ linux-headers make musl-dev
-
-# Install gRPC & protobufs for Python
-RUN pip3 install grpcio
-RUN pip3 install protobuf
-
-ENV PYTHONPATH="/repo/build_out"
 ARG DBPATH
 ENV DBPATH=$DBPATH
 

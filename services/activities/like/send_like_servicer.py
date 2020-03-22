@@ -1,11 +1,7 @@
-import os
-import sys
-import json
-from urllib import request
-
 from services.proto import database_pb2
 from services.proto import like_pb2
 from like_util import build_like_activity
+
 
 class SendLikeServicer:
     def __init__(self, logger, db, user_util, activ_util, hostname=None):
@@ -14,10 +10,7 @@ class SendLikeServicer:
         self._user_util = user_util
         self._activ_util = activ_util
         # Use the hostname passed in or get it manually
-        self._hostname = hostname if hostname else os.environ.get('HOST_NAME')
-        if not self._hostname:
-            self._logger.error("'HOST_NAME' env var is not set")
-            sys.exit(1)
+        self._hostname = hostname if hostname else self._activ_util._hostname
 
     def _get_author(self, article):
         user = self._user_util.get_user_from_db(
@@ -43,7 +36,7 @@ class SendLikeServicer:
         elif len(resp.results) != 1:
             return None, "Expected 1 result, got " + str(len(resp.results))
         return resp.results[0], None
-    
+
     def SendLikeActivity(self, req, context):
         response = like_pb2.LikeResponse(
             result_type=like_pb2.LikeResponse.OK)
@@ -69,5 +62,3 @@ class SendLikeServicer:
             response.result_type = like_pb2.LikeResponse.ERROR
             response.error = err
         return response
- 
-

@@ -4,12 +4,12 @@ from services.proto import database_pb2
 
 class ActorsServicer:
 
-    def __init__(self, db_stub, logger, users_util, activities_util, host_name):
+    def __init__(self, db_stub, logger, users_util, activ_util):
         self._db_stub = db_stub
         self._logger = logger
         self._users_util = users_util
-        self._activities_util = activities_util
-        self._host_name = host_name
+        self._activ_util = activ_util
+        self._host_name = self._activ_util._hostname
 
     def _generate_key_id(self, _id):
         return '{}#main-key'.format(_id)
@@ -31,7 +31,7 @@ class ActorsServicer:
         return resp.results[0].public_key
 
     def _get_public_key(self, handle):
-        _id = self._activities_util.build_actor(handle, self._host_name)
+        _id = self._activ_util.build_actor(handle, self._host_name)
         public_key = self._fetch_public_key_from_database(handle)
         return actors_pb2.PublicKey(
             id=self._generate_key_id(_id),
@@ -47,9 +47,9 @@ class ActorsServicer:
             return None
 
         handle = user.handle
-        inbox_url = self._activities_util.build_inbox_url(handle,
-                                                          self._host_name)
-        actor_url = self._activities_util.build_actor(handle, self._host_name)
+        inbox_url = self._activ_util.build_inbox_url(handle,
+                                                     self._host_name)
+        actor_url = self._activ_util.build_actor(handle, self._host_name)
         following_url = actor_url + "/following"
         followers_url = actor_url + "/followers"
 
@@ -84,16 +84,16 @@ class ActorsServicer:
             self._logger.warning('Could not find user in database.')
             return actors_pb2.ArticleResponse()
 
-        actor_url = self._activities_util.build_actor(
+        actor_url = self._activ_util.build_actor(
             user.handle, self._host_name)
         articleEntry = database_pb2.PostsEntry(
             global_id=req.article_id
         )
-        article_id = self._activities_util.build_article_ap_id(
+        article_id = self._activ_util.build_article_ap_id(
             user, articleEntry)
-        article_url = self._activities_util.build_local_article_url(
+        article_url = self._activ_util.build_local_article_url(
             user, articleEntry)
-        article, err = self._activities_util.get_article_by_ap_id(
+        article, err = self._activ_util.get_article_by_ap_id(
             article_id)
         if err is not None:
             self._logger.warning(
@@ -102,7 +102,7 @@ class ActorsServicer:
                 'ArticleId: {}'.format(article_id))
             return actors_pb2.ArticleResponse()
 
-        publish_time = self._activities_util.timestamp_to_rfc(
+        publish_time = self._activ_util.timestamp_to_rfc(
             article.creation_datetime)
 
         return actors_pb2.ArticleResponse(

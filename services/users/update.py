@@ -26,7 +26,7 @@ class UpdateHandler:
                     error=str(e),
                 )
 
-        if err != None:
+        if err is not None:
             return users_pb2.UpdateUserResponse(
                 result=users_pb2.UpdateUserResponse.DENIED,
             )

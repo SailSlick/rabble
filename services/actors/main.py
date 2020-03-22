@@ -2,8 +2,6 @@
 from concurrent import futures
 import argparse
 import grpc
-import os
-import sys
 import time
 
 from utils.connect import get_service_channel
@@ -26,14 +24,6 @@ def get_args():
     return parser.parse_args()
 
 
-def get_host_name(logger):
-    host = os.environ.get('HOST_NAME')
-    if not host:
-        logger.error('HOST_NAME env var not set.')
-        sys.exit(1)
-    return host
-
-
 def main():
     args = get_args()
     logger = get_logger('actors_service', args.v)
@@ -46,12 +36,11 @@ def main():
 
         users_util = UsersUtil(logger, db_stub)
         activities_util = ActivitiesUtil(logger, db_stub)
-        host_name = get_host_name(logger)
 
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
         servicer = Servicer(logger, users_util, activities_util,
-                            db_stub, host_name, follows_stub)
+                            db_stub, follows_stub)
         actors_pb2_grpc.add_ActorsServicer_to_server(servicer, server)
 
         server.add_insecure_port('0.0.0.0:1973')

@@ -1,8 +1,3 @@
-import os
-import sys
-import json
-from urllib import request
-
 from services.proto import database_pb2
 from services.proto import announce_pb2
 from announce_util import AnnounceUtil
@@ -15,12 +10,9 @@ class SendAnnounceServicer:
         self._users_util = users_util
         self._activ_util = activ_util
         # Use the hostname passed in or get it manually
-        self._hostname = hostname if hostname else os.environ.get("HOST_NAME")
+        self._hostname = hostname if hostname else self._activ_util._hostname
         self._announce_util = AnnounceUtil(
-            logger, db, activ_util, self._hostname)
-        if not self._hostname:
-            self._logger.error("'HOST_NAME' env var is not set")
-            sys.exit(1)
+            logger, db, self._activ_util, self._hostname)
 
     def _get_shared_article(self, article_id):
         posts_req = database_pb2.PostsRequest(
@@ -55,7 +47,7 @@ class SendAnnounceServicer:
 
         # Get post author & reblogged article
         article, err = self._get_shared_article(req.article_id)
-        if err != None:
+        if err is not None:
             response.result_type = announce_pb2.AnnounceResponse.ERROR
             response.error = "Shared Article does not exist"
             return response

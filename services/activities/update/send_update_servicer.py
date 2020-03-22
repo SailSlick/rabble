@@ -1,11 +1,6 @@
-import os
-import sys
-
 from services.proto import database_pb2 as dbpb
 from services.proto import update_pb2 as upb
 from utils.articles import get_article, convert_to_tags_string, md_to_html
-
-HOSTNAME_ENV = 'HOST_NAME'
 
 
 class SendUpdateServicer:
@@ -15,10 +10,7 @@ class SendUpdateServicer:
         self._md = md
         self._activ_util = activ_util
         self._users_util = users_util
-        self._hostname = hostname if hostname else os.environ.get(HOSTNAME_ENV)
-        if not self._hostname:
-            self._logger.error("Hostname for SendUpdateServicer not set")
-            sys.exit(1)
+        self._hostname = hostname if hostname else self._activ_util._hostname
 
     def _update_locally(self, article, req):
         self._logger.info("Sending update request to DB")

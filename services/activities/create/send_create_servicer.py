@@ -1,6 +1,4 @@
 import urllib3
-import json
-import os
 
 from services.proto import create_pb2
 from services.proto import database_pb2
@@ -9,16 +7,12 @@ from services.proto import database_pb2
 class SendCreateServicer:
 
     def __init__(self, db_stub, logger, users_util, activ_util):
-        host_name = os.environ.get("HOST_NAME")
-        if not host_name:
-            print("Please set HOST_NAME env variable")
-            sys.exit(1)
-        self._host_name = host_name
         self._db_stub = db_stub
         self._logger = logger
         self._users_util = users_util
         self._activ_util = activ_util
         self._client = urllib3.PoolManager()
+        self._host_name = self._activ_util._hostname
 
     def _add_ap_id(self, global_id, ap_id):
         req = database_pb2.PostsRequest(

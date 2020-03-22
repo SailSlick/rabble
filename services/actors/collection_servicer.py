@@ -5,12 +5,12 @@ import json
 
 class CollectionServicer:
 
-    def __init__(self, logger, users_util, activities_util, db_stub, host_name, follows_stub):
+    def __init__(self, logger, users_util, activ_util, db_stub, follows_stub):
         self._logger = logger
         self._users_util = users_util
-        self._activities_util = activities_util
+        self._activ_util = activ_util
         self._db_stub = db_stub
-        self._host_name = host_name
+        self._host_name = self._activ_util._hostname
         self._follows_stub = follows_stub
 
     def _convert_follow_user_to_person(self, follow_user):
@@ -20,11 +20,11 @@ class CollectionServicer:
         if follow_user.host is None or follow_user.host == "":
             host = self._host_name
 
-        return self._activities_util.build_actor(follow_user.handle, host)
+        return self._activ_util.build_actor(follow_user.handle, host)
 
     def _create_collection(self, summary, item_list):
         collection = {
-            "@context":  self._activities_util.rabble_context(),
+            "@context":  self._activ_util.rabble_context(),
             "summary": summary,
             "type": "Collection",
             "totalItems": len(item_list),
@@ -50,7 +50,8 @@ class CollectionServicer:
             )
             return None
 
-        user_list = [self._convert_follow_user_to_person(x) for x in gfr.results]
+        user_list = [self._convert_follow_user_to_person(
+            x) for x in gfr.results]
         return self._create_collection(summary, user_list)
 
     def _create_followers(self, username):
@@ -70,15 +71,18 @@ class CollectionServicer:
             )
             return None
 
-        user_list = [self._convert_follow_user_to_person(x) for x in gfr.results]
+        user_list = [self._convert_follow_user_to_person(
+            x) for x in gfr.results]
         return self._create_collection(summary, user_list)
 
     def GetFollowing(self, request, context):
-        self._logger.debug('Following collection requested for {}'.format(request.username))
+        self._logger.debug(
+            'Following collection requested for {}'.format(request.username))
         collection = self._create_following(request.username)
         return actors_pb2.CollectionResponse(collection=collection)
 
     def GetFollowers(self, request, context):
-        self._logger.debug('Followers collection requested for {}'.format(request.username))
+        self._logger.debug(
+            'Followers collection requested for {}'.format(request.username))
         collection = self._create_followers(request.username)
         return actors_pb2.CollectionResponse(collection=collection)

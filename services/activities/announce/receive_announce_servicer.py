@@ -1,5 +1,3 @@
-import os
-
 from services.proto import database_pb2 as db_pb
 from services.proto import announce_pb2
 from services.proto import article_pb2
@@ -13,14 +11,10 @@ class ReceiveAnnounceServicer:
         self._users_util = users_util
         self._activ_util = activ_util
         # Use the hostname passed in or get it manually
-        self._hostname = hostname if hostname else os.environ.get('HOST_NAME')
+        self._hostname = hostname if hostname else self._activ_util._hostname
         self._announce_util = AnnounceUtil(
             logger, db, activ_util, self._hostname)
         self._article_stub = article_stub
-        if not self._hostname:
-            self._logger.error(
-                "'HOST_NAME' env var is not set and no hostname is passed in")
-            sys.exit(1)
 
     def get_user_by_ap_id(self, actor_tuple):
         host = self._activ_util.get_host_name_param(
