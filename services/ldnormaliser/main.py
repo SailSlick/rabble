@@ -5,7 +5,7 @@ import grpc
 import time
 
 from utils.logger import get_logger
-from servicer import LDNormServicer
+from ldnormaliser.servicer import LDNormServicer
 from services.proto import ldnorm_pb2_grpc
 
 
@@ -33,6 +33,7 @@ def main():
             time.sleep(60 * 60 * 24)  # One day
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == '__main__':
     main()

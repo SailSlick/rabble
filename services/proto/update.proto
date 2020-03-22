@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option go_package = "services/proto";
 
+import "services/proto/general.proto";
+
 message UpdateDetails {
   int64 user_id = 1;
   int64 article_id = 2;
@@ -11,19 +13,6 @@ message UpdateDetails {
   string summary = 6;
 }
 
-message UpdateResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-    DENIED = 2;
-  }
-
-  ResultType result_type = 1;
-
-  // Should only be set if result_type is not OK
-  string error = 2;
-}
-
 message ReceivedUpdateDetails {
   string ap_id = 1;
   string body = 2;
@@ -31,9 +20,8 @@ message ReceivedUpdateDetails {
   string summary = 4;
 }
 
-
 // Service for sending and receiving server-to-server update activities.
 service S2SUpdate {
-  rpc ReceiveUpdateActivity(ReceivedUpdateDetails) returns (UpdateResponse);
-  rpc SendUpdateActivity(UpdateDetails) returns (UpdateResponse);
+  rpc ReceiveUpdateActivity(ReceivedUpdateDetails) returns (GeneralResponse);
+  rpc SendUpdateActivity(UpdateDetails) returns (GeneralResponse);
 }

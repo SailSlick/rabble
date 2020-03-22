@@ -3,23 +3,12 @@ syntax = "proto3";
 option go_package = "services/proto";
 
 import "google/protobuf/timestamp.proto";
+import "services/proto/general.proto";
 
 message AnnounceDetails {
   int64 article_id = 1;
   int64 announcer_id = 2;
   google.protobuf.Timestamp announce_time = 3;
-}
-
-message AnnounceResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
-
-  ResultType result_type = 1;
-
-  // Should only be set if result_type is not OK
-  string error = 2;
 }
 
 message ReceivedAnnounceDetails {
@@ -45,6 +34,6 @@ message ReceivedAnnounceDetails {
 
 
 service Announce {
-  rpc SendAnnounceActivity(AnnounceDetails) returns (AnnounceResponse);
-  rpc ReceiveAnnounceActivity(ReceivedAnnounceDetails) returns (AnnounceResponse);
+  rpc SendAnnounceActivity(AnnounceDetails) returns (GeneralResponse);
+  rpc ReceiveAnnounceActivity(ReceivedAnnounceDetails) returns (GeneralResponse);
 }

@@ -1,6 +1,6 @@
 import urllib3
 
-from services.proto import create_pb2
+from services.proto import general_pb2
 from services.proto import database_pb2
 
 
@@ -25,7 +25,7 @@ class SendCreateServicer:
             ),
         )
         resp = self._db_stub.Posts(req)
-        if resp.result_type != database_pb2.PostsResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             return "Error inserting ap_id into DB: " + str(resp.error)
         return None
 
@@ -84,6 +84,6 @@ class SendCreateServicer:
         for follower in foreign_follows:
             self._post_create_req(follower, req, ap_id, author, article_url)
 
-        resp = create_pb2.CreateResponse()
-        resp.result_type = create_pb2.CreateResponse.OK
+        resp = general_pb2.GeneralResponse()
+        resp.result_type = general_pb2.ResultType.OK
         return resp

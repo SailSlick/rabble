@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "services/proto";
+
+enum ResultType {
+  OK = 0;
+  ERROR = 1;
+  ERROR_400 = 2;
+  DENIED = 3;
+}
+
+message GeneralResponse {
+  ResultType result_type = 1;
+
+  // Should only be set if result_type is not OK
+  string error = 2;
+}

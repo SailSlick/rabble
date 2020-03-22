@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option go_package = "services/proto";
 
+import "services/proto/general.proto";
+
 message DeleteDetails {
   // ID of the user requesting the delete.
   int64 user_id = 1;
@@ -15,20 +17,8 @@ message ReceivedDeleteDetails {
   string ap_id = 1;
 }
 
-message DeleteResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-    DENIED = 2;
-  }
-  ResultType result_type = 1;
-  // Is only set if result_type is not OK.
-  string error = 2;
-}
-
 // Service for sending and receiving server-to-server delete activities.
 service S2SDelete {
-  rpc ReceiveDeleteActivity(ReceivedDeleteDetails) returns (DeleteResponse);
-  rpc SendDeleteActivity(DeleteDetails) returns (DeleteResponse);
+  rpc ReceiveDeleteActivity(ReceivedDeleteDetails) returns (GeneralResponse);
+  rpc SendDeleteActivity(DeleteDetails) returns (GeneralResponse);
 }
-

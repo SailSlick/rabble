@@ -5,8 +5,8 @@ import grpc
 import time
 
 from utils.logger import get_logger
-from database import build_database
-from database_servicer import DatabaseServicer
+from database.db import build_database
+from database.database_servicer import DatabaseServicer
 from services.proto import database_pb2_grpc
 
 
@@ -42,6 +42,7 @@ def main():
             time.sleep(60 * 60 * 24)  # One day
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == '__main__':
     main()

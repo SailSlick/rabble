@@ -1,6 +1,7 @@
 import sqlite3
 
 from services.proto import database_pb2 as db_pb
+from services.proto import general_pb2
 
 
 DEFAULT_NUM_POSTS = 25
@@ -25,7 +26,7 @@ class ShareDatabaseServicer:
 
     def SharedPosts(self, request, context):
         resp = db_pb.SharesResponse(
-            result_type=db_pb.SharesResponse.OK
+            result_type=general_pb2.ResultType.OK
         )
         n = request.num_posts
         if not n:
@@ -45,7 +46,7 @@ class ShareDatabaseServicer:
                 if not self._db_tuple_to_entry(tup, resp.results.add()):
                     del resp.results[-1]
         except sqlite3.Error as e:
-            resp.result_type = db_pb.SharesResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -87,7 +88,7 @@ class ShareDatabaseServicer:
             req.user_id, req.article_id
         )
         response = db_pb.SharesResponse(
-            result_type=db_pb.SharesResponse.OK
+            result_type=general_pb2.ResultType.OK
         )
         try:
             self._db.execute(
@@ -106,7 +107,7 @@ class ShareDatabaseServicer:
         except sqlite3.Error as e:
             self._db.discard_cursor()
             self._logger.error("AddShare error: %s", str(e))
-            response.result_type = db_pb.AddShareResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = str(e)
         return response
 
@@ -116,7 +117,7 @@ class ShareDatabaseServicer:
             req.user_id, req.article_id
         )
         resp = db_pb.FindShareResponse(
-            result_type=db_pb.FindShareResponse.OK
+            result_type=general_pb2.ResultType.OK
         )
         try:
             res = self._db.execute("SELECT * " +
@@ -126,7 +127,7 @@ class ShareDatabaseServicer:
             if len(res) > 0:
                 resp.exists = True
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.FindShareResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
         return resp
@@ -135,7 +136,7 @@ class ShareDatabaseServicer:
         self._logger.debug("Finding sharers of post %d", req.global_id)
         if not req.global_id:
             return db_pb.SharesResponse(
-                result_type=db_pb.SharesResponse.ERROR,
+                result_type=general_pb2.ResultType.ERROR,
                 error="Sharers must be requested by article global_id",
             )
         sql = "SELECT user_id FROM shares WHERE article_id = ?"
@@ -144,11 +145,10 @@ class ShareDatabaseServicer:
         except sqlite3.Error as e:
             self._logger.error("GetSharersOfPost error: %s", str(e))
             return db_pb.SharesResponse(
-                result_type=db_pb.SharesResponse.ERROR,
+                result_type=general_pb2.ResultType.ERROR,
                 error=str(e),
             )
         return db_pb.SharesResponse(
-            result_type=db_pb.SharesResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[db_pb.SharesEntry(sharer_id=s[0]) for s in res],
         )
-

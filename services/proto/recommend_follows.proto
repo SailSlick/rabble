@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option go_package = "services/proto";
 
+import "services/proto/general.proto";
+
 message FollowRecommendationUser {
     string handle = 1;
     string host = 2;
@@ -17,12 +19,6 @@ message FollowRecommendationRequest {
 }
 
 message FollowRecommendationResponse {
-    enum ResultType {
-        OK = 0;
-        ERROR = 1;
-        // More types can be added here.
-    }
-
     ResultType result_type = 1;
 
     /* Should only be set if result_type is not OK. */

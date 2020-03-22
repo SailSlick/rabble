@@ -3,6 +3,7 @@ syntax = "proto3";
 option go_package = "services/proto";
 
 import "google/protobuf/timestamp.proto";
+import "services/proto/general.proto";
 
 message Log {
   // Modeled on Python's levels
@@ -28,17 +29,6 @@ message Log {
   string message = 4;
 }
 
-message WriteLogResponse {
-  enum ResponseType {
-    OK    = 0;
-    ERROR = 1;
-  }
-
-  // Can likely be ignored.
-  ResponseType response_type = 1;
-}
-
 service Logger {
-  rpc WriteLog(Log) returns (WriteLogResponse);
+  rpc WriteLog(Log) returns (GeneralResponse);
 }
-

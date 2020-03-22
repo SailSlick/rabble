@@ -63,10 +63,10 @@ type LikeFake struct {
 	rq *pb.ReceivedLikeDetails
 }
 
-func (d *LikeFake) ReceiveLikeActivity(_ context.Context, r *pb.ReceivedLikeDetails, _ ...grpc.CallOption) (*pb.LikeResponse, error) {
+func (d *LikeFake) ReceiveLikeActivity(_ context.Context, r *pb.ReceivedLikeDetails, _ ...grpc.CallOption) (*pb.GeneralResponse, error) {
 	d.rq = r
-	return &pb.LikeResponse{
-		ResultType: pb.LikeResponse_OK,
+	return &pb.GeneralResponse{
+		ResultType: pb.ResultType_OK,
 	}, nil
 }
 

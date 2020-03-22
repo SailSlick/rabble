@@ -1,10 +1,10 @@
-from get_followers import GetFollowsReceiver
-from receive_follow import ReceiveFollowServicer
-from send_follow import SendFollowServicer
-from send_unfollow import SendUnfollowServicer
-from receive_unfollow import ReceiveUnfollowServicer
-from rss_follow import RssFollowServicer
-from accept_follow import AcceptFollowServicer
+from follows.get_followers import GetFollowsReceiver
+from follows.receive_follow import ReceiveFollowServicer
+from follows.send_follow import SendFollowServicer
+from follows.send_unfollow import SendUnfollowServicer
+from follows.receive_unfollow import ReceiveUnfollowServicer
+from follows.rss_follow import RssFollowServicer
+from follows.accept_follow import AcceptFollowServicer
 
 from services.proto import follows_pb2_grpc
 

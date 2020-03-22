@@ -38,7 +38,7 @@ type ArticleFake struct {
 func (a *ArticleFake) CreateNewArticle(_ context.Context, r *pb.NewArticle, _ ...grpc.CallOption) (*pb.NewArticleResponse, error) {
 	a.na = r
 	return &pb.NewArticleResponse{
-		ResultType: pb.NewArticleResponse_OK,
+		ResultType: pb.ResultType_OK,
 		GlobalId:   "test id",
 	}, nil
 }
@@ -57,7 +57,7 @@ func (d *DatabaseFake) Users(_ context.Context, r *pb.UsersRequest, _ ...grpc.Ca
 		Rss:      "https://news.ycombinator.com/rss",
 	}
 	return &pb.UsersResponse{
-		ResultType: pb.UsersResponse_OK,
+		ResultType: pb.ResultType_OK,
 		Results:    []*pb.UsersEntry{ue},
 	}, nil
 }

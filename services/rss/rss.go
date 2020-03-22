@@ -78,7 +78,7 @@ func (s *serverWrapper) sendCreateArticle(ctx context.Context, authorID int64, t
 	newArtResp, newArtErr := s.art.CreateNewArticle(ctx, na)
 	if newArtErr != nil {
 		log.Printf("ERROR: Could not create new article: %v", newArtErr)
-	} else if newArtResp.ResultType != pb.NewArticleResponse_OK {
+	} else if newArtResp.ResultType != pb.ResultType_OK {
 		log.Printf("ERROR: Could not create new article message: %v", newArtResp.Error)
 	}
 }
@@ -132,7 +132,7 @@ func (s *serverWrapper) GetUser(ctx context.Context, globalID int64) (*pb.UsersE
 	if findErr != nil {
 		return nil, fmt.Errorf(findUserErrorFmt, globalID, findErr)
 	}
-	if findResp.ResultType != pb.UsersResponse_OK {
+	if findResp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(findUserErrorFmt, globalID, findResp.Error)
 	}
 	if len(findResp.Results) < 1 {
@@ -155,7 +155,7 @@ func (s *serverWrapper) GetUserPosts(ctx context.Context, authorID int64) ([]*pb
 	if findErr != nil {
 		return nil, fmt.Errorf(findUserPostsErrorFmt, authorID, findErr)
 	}
-	if findResp.ResultType != pb.PostsResponse_OK {
+	if findResp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(findUserPostsErrorFmt, authorID, findResp.Error)
 	}
 	return findResp.Results, nil
@@ -261,7 +261,7 @@ func (s *serverWrapper) NewRssFollow(ctx context.Context, r *pb.NewRssFeed) (*pb
 		return rssr, nil
 	}
 
-	if insertResp.ResultType != pb.UsersResponse_OK {
+	if insertResp.ResultType != pb.ResultType_OK {
 		log.Printf("Rss user insert failed. message: %v\n", insertResp.Error)
 		rssr.ResultType = pb.NewRssFeedResponse_ERROR
 		rssr.Message = insertResp.Error
@@ -286,7 +286,7 @@ func (s *serverWrapper) NewRssFollow(ctx context.Context, r *pb.NewRssFeed) (*pb
 		return rssr, nil
 	}
 
-	if findResp.ResultType != pb.UsersResponse_OK || len(findResp.Results) < 1 {
+	if findResp.ResultType != pb.ResultType_OK || len(findResp.Results) < 1 {
 		log.Printf("Rss user find failed. message: %v\n", findResp.Error)
 		rssr.ResultType = pb.NewRssFeedResponse_ERROR
 		rssr.Message = findResp.Error

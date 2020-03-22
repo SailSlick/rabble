@@ -1,6 +1,4 @@
-import json
-
-from services.proto import s2s_follow_pb2, database_pb2
+from services.proto import database_pb2, general_pb2
 
 
 class SendFollowServicer:
@@ -29,7 +27,6 @@ class SendFollowServicer:
             d['to'] = [followed_actor]
         return d
 
-
     def _build_undo(self, undoer_actor, unfollowed_actor, follow_activity):
         d = {
             '@context':  self._activ_util.rabble_context(),
@@ -39,13 +36,13 @@ class SendFollowServicer:
             'to': [unfollowed_actor]
         }
         return d
-      
+
     def _get_local_user_id(self, handle):
         user = database_pb2.UsersEntry(handle=handle, host_is_null=True)
         req = database_pb2.UsersRequest(request_type=database_pb2.UsersRequest.FIND,
                                         match=user)
         resp = self._db.Users(req)
-        if resp.result_type != database_pb2.UsersResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.warning('Error getting user: {}'.format(resp.error))
             return None
         if not len(resp.results):
@@ -55,7 +52,8 @@ class SendFollowServicer:
 
     def _send(self, activ, url, handle):
         sender_id = self._get_local_user_id(handle)
-        resp, err = self._activ_util.send_activity(activ, url, sender_id=sender_id)
+        resp, err = self._activ_util.send_activity(
+            activ, url, sender_id=sender_id)
         if err is not None:
             return err
         elif resp.status_code < 200 or resp.status_code >= 300:
@@ -63,7 +61,7 @@ class SendFollowServicer:
         return None
 
     def SendFollowActivity(self, req, context):
-        resp = s2s_follow_pb2.FollowActivityResponse()
+        resp = general_pb2.GeneralResponse()
         follower_actor = self._activ_util.build_actor(
             req.follower.handle, req.follower.host)
         followed_actor = self._activ_util.build_actor(
@@ -76,14 +74,14 @@ class SendFollowServicer:
 
         err = self._send(activity, inbox_url, req.follower.handle)
         if err is None:
-            resp.result_type = s2s_follow_pb2.FollowActivityResponse.OK
+            resp.result_type = general_pb2.ResultType.OK
         else:
-            resp.result_type = s2s_follow_pb2.FollowActivityResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = err
         return resp
 
     def SendUnfollowActivity(self, req, context):
-        resp = s2s_follow_pb2.FollowActivityResponse()
+        resp = general_pb2.GeneralResponse()
 
         follower_actor = self._activ_util.build_actor(
             req.follower.handle, req.follower.host)
@@ -108,10 +106,9 @@ class SendFollowServicer:
                                                 inbox_url,
                                                 sender_id=sender_id)
         if err is None:
-            resp.result_type = s2s_follow_pb2.FollowActivityResponse.OK
+            resp.result_type = general_pb2.ResultType.OK
         else:
-            resp.result_type = s2s_follow_pb2.FollowActivityResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = err
-
 
         return resp

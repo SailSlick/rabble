@@ -130,7 +130,7 @@ func GetAuthorFromDb(ctx context.Context, handle string, host string, hostIsNull
 		return nil, fmt.Errorf(errFmt, handle, host, err)
 	}
 
-	if resp.ResultType != pb.UsersResponse_OK {
+	if resp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(errFmt, handle, host, resp.Error)
 	}
 

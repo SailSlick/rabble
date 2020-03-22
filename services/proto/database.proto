@@ -4,6 +4,7 @@ option go_package = "services/proto";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
+import "services/proto/general.proto";
 
 message PostsEntry {
   int64 global_id = 1;
@@ -51,12 +52,6 @@ message PostsRequest {
 }
 
 message PostsResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-    // Further types can be specified here.
-  }
-
   ResultType result_type = 1;
 
   string error = 2;
@@ -116,12 +111,6 @@ message UsersRequest {
 }
 
 message UsersResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-    // Further types can be specified here.
-  }
-
   ResultType result_type = 1;
 
   string error = 2;
@@ -183,11 +172,6 @@ message DbFollowRequest {
 }
 
 message DbFollowResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
-
   ResultType result_type = 1;
   string error = 2;
 
@@ -199,24 +183,11 @@ message LikeEntry {
   int64 article_id = 2;
 }
 
-message DBLikeResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
-  ResultType result_type = 1;
-  string error = 2;
-}
-
 message LikedCollectionRequest {
   int64 user_id = 1;
 }
 
 message LikedCollectionResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
   ResultType result_type = 1;
   string error = 2;
   repeated string liked_ap_ids = 3;
@@ -227,10 +198,6 @@ message LikesCollectionRequest {
 }
 
 message LikesCollectionResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
   ResultType result_type = 1;
   string error = 2;
   repeated int64 liking_user_ids = 3;
@@ -281,12 +248,6 @@ message SharesEntry {
 }
 
 message SharesResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-    // Further types can be specified here.
-  }
-
   ResultType result_type = 1;
 
   string error = 2;
@@ -301,10 +262,6 @@ message PendingFollowRequest {
 }
 
 message PendingFollowResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
   ResultType result_type = 1;
   string error = 2;
 
@@ -356,12 +313,6 @@ message ShareEntry {
 }
 
 message FindShareResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-    // Further types can be specified here.
-  }
-
   ResultType result_type = 1;
 
   string error = 2;
@@ -371,15 +322,6 @@ message FindShareResponse {
   bool exists = 3;
 }
 
-message AddShareResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
-  ResultType result_type = 1;
-  string error = 2;
-}
-
 service Database {
   rpc Posts(PostsRequest) returns (PostsResponse);
   rpc Users(UsersRequest) returns (UsersResponse);
@@ -387,8 +329,8 @@ service Database {
 
   // The likes table will require a lot of cross-table style requests,
   // this is why the RPC is in a different style.
-  rpc AddLike(LikeEntry) returns (DBLikeResponse);
-  rpc RemoveLike(LikeEntry) returns (DBLikeResponse);
+  rpc AddLike(LikeEntry) returns (GeneralResponse);
+  rpc RemoveLike(LikeEntry) returns (GeneralResponse);
   // All the article (ActivityPub) ids liked by a given user.
   rpc LikedCollection(LikedCollectionRequest) returns (LikedCollectionResponse);
   // The user global_ids who like a given article.
@@ -415,7 +357,7 @@ service Database {
   rpc AddLog(ClientLog) returns (AddLogResponse);
 
   // Add a share item to database
-  rpc AddShare(ShareEntry) returns (AddShareResponse);
+  rpc AddShare(ShareEntry) returns (GeneralResponse);
   rpc FindShare(ShareEntry) returns (FindShareResponse);
 
   // Get all users this instance knows about.

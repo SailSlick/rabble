@@ -1,4 +1,5 @@
 from services.proto import delete_pb2 as dpb
+from services.proto import general_pb2
 from utils.articles import delete_article, get_article, get_sharers_of_article
 
 
@@ -19,11 +20,13 @@ class ReceiveDeleteServicer:
             # deletes of articles that were created before a follower
             # followed the creator, etc.
             self._logger.info("Don't have article %s, exiting", req.ap_id)
-            return dpb.DeleteResponse(result_type=dpb.DeleteResponse.OK)
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.OK
+            )
         author = self._users_util.get_user_from_db(global_id=article.author_id)
         if author is None:
-            return dpb.DeleteResponse(
-                result_type=dpb.DeleteResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Could not retrieve author",
             )
         # Grab the people who shared the article before we delete everything.
@@ -31,8 +34,8 @@ class ReceiveDeleteServicer:
             self._logger, self._db, article.global_id)
         # Delete the local copy.
         if not delete_article(self._logger, self._db, ap_id=req.ap_id):
-            return dpb.DeleteResponse(
-                result_type=dpb.DeleteResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Could not delete article",
             )
         # Forward the delete to the announcers.
@@ -45,4 +48,6 @@ class ReceiveDeleteServicer:
                 # Warn but do not quit on error sending to announcer followers.
                 self._logger.warning(
                     "Sending activity to %d followers failed", user_id)
-        return dpb.DeleteResponse(result_type=dpb.DeleteResponse.OK)
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
+        )

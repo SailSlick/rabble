@@ -1,8 +1,8 @@
 from services.proto import users_pb2_grpc
-from login import LoginHandler
-from create import CreateHandler
-from update import UpdateHandler
-from get_css import GetCssHandler
+from users.login import LoginHandler
+from users.create import CreateHandler
+from users.update import UpdateHandler
+from users.get_css import GetCssHandler
 
 
 class UsersServicer(users_pb2_grpc.UsersServicer):

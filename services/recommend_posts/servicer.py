@@ -1,11 +1,9 @@
-import os
+from recommend_posts.random_recommender import RandomRecommender
+from recommend_posts.cosine_recommender import CosineRecommender
 
-from random_recommender import RandomRecommender
-from cosine_recommender import CosineRecommender
-
-from services.proto import database_pb2
 from services.proto import recommend_posts_pb2_grpc
 from services.proto import recommend_posts_pb2
+from services.proto import general_pb2
 from utils.recommenders import RecommendersUtil
 from utils.activities import ActivitiesUtil
 
@@ -48,7 +46,7 @@ class PostRecommendationsServicer(recommend_posts_pb2_grpc.PostRecommendationsSe
                 request.user_id, max_posts_per_r)
             if error:
                 resp.result_type = \
-                    recommend_posts_pb2.PostRecommendationsResponse.ERROR
+                    general_pb2.ResultType.ERROR
                 resp.message = error
                 return resp
             recommended_posts.append(r_posts)
@@ -61,9 +59,9 @@ class PostRecommendationsServicer(recommend_posts_pb2_grpc.PostRecommendationsSe
                 if i < len(r_p):
                     author = self._users_util.get_user_from_db(
                         global_id=r_p[i].author_id)
-                    if author == None:
+                    if author is None:
                         resp.result_type = \
-                            recommend_posts_pb2.PostRecommendationsResponse.ERROR
+                            general_pb2.ResultType.ERROR
                         resp.message = "Post Author could not be found"
                         return resp
                     post_obj = resp.results.add()
@@ -85,7 +83,7 @@ class PostRecommendationsServicer(recommend_posts_pb2_grpc.PostRecommendationsSe
                     tags = self._recommender_util.split_tags(r_p[i].tags)
                     post_obj.tags.extend(tags)
         resp.result_type = \
-            recommend_posts_pb2.PostRecommendationsResponse.OK
+            general_pb2.ResultType.OK
         return resp
 
     def UpdateModel(self, request, context):
@@ -98,12 +96,12 @@ class PostRecommendationsServicer(recommend_posts_pb2_grpc.PostRecommendationsSe
             error = r.update_model(request.user_id, request.article_id)
             if error:
                 resp.result_type = \
-                    recommend_posts_pb2.PostRecommendationsResponse.ERROR
+                    general_pb2.ResultType.ERROR
                 resp.message = error
                 return resp
 
         resp.result_type = \
-            recommend_posts_pb2.PostRecommendationsResponse.OK
+            general_pb2.ResultType.OK
         return resp
 
     def AddPost(self, request, context):
@@ -116,10 +114,10 @@ class PostRecommendationsServicer(recommend_posts_pb2_grpc.PostRecommendationsSe
             error = r.add_post(request)
             if error:
                 resp.result_type = \
-                    recommend_posts_pb2.PostRecommendationsResponse.ERROR
+                    general_pb2.ResultType.ERROR
                 resp.message = error
                 return resp
 
         resp.result_type = \
-            recommend_posts_pb2.PostRecommendationsResponse.OK
+            general_pb2.ResultType.OK
         return resp

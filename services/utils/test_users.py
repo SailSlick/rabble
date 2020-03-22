@@ -1,7 +1,8 @@
 import logging
+import os
 import unittest
 
-from users import UsersUtil
+from utils.users import UsersUtil
 
 
 class UsersUtilTest(unittest.TestCase):
@@ -13,6 +14,7 @@ class UsersUtilTest(unittest.TestCase):
                 'summary': 'cianlr is here'
             }
 
+        os.environ["HOST_NAME"] = "cianisharrypotter.secret"
         self.logger = logging.getLogger(__name__)
         self.util = UsersUtil(self.logger, None)
         self.util._activ_util.fetch_actor = _fake_fetch_actor

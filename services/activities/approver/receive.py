@@ -1,5 +1,5 @@
-from services.proto import approver_pb2
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 
 class ReceiveApprovalServicer:
@@ -17,7 +17,7 @@ class ReceiveApprovalServicer:
             err = "Could not find local follower {} in db".format(handle)
             self._logger.error(err)
             resp.error = err
-            resp.result_type = approver_pb2.ApprovalResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR_400
             return None, None
 
         host, foreign_handle = self._users_util.parse_actor(
@@ -34,7 +34,7 @@ class ReceiveApprovalServicer:
                                                                host)
             self._logger.error(err)
             resp.error = err
-            resp.result_type = approver_pb2.ApprovalResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR_400
             return follower, None
 
         return follower, followed
@@ -68,7 +68,7 @@ class ReceiveApprovalServicer:
 
     def ReceiveApproval(self, req, context):
         self._logger.info("Received an approval request")
-        resp = approver_pb2.ApprovalResponse()
+        resp = general_pb2.GeneralResponse()
 
         follower, followed = self._get_users(resp, req)
         if follower is None or followed is None:
@@ -80,12 +80,12 @@ class ReceiveApprovalServicer:
         else:
             db_resp = self._set_rejected(follower, followed)
 
-        if db_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if db_resp.result_type == general_pb2.ResultType.ERROR:
             err = "Could not add follow to database: " + db_resp.error
             self._logger.error(err)
             resp.error = err
-            resp.result_type = approver_pb2.ApprovalResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             return resp
 
-        resp.result_type = approver_pb2.ApprovalResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         return resp

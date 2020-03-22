@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import requests
 
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 from utils.activities import ActivitiesUtil
 
@@ -100,7 +101,7 @@ class UsersUtil:
             entry=entry
         )
         insert_resp = self._db.Users(insert_req)
-        if insert_resp.result_type != database_pb2.UsersResponse.OK:
+        if insert_resp.result_type != general_pb2.ResultType.OK:
             self._logger.error("Error inserting into users db %s",
                                insert_resp.error)
             return None
@@ -114,7 +115,7 @@ class UsersUtil:
                 global_id=global_id
             ),
         ))
-        if resp.result_type != database_pb2.UsersResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.error("Error deleting from db: %s",
                                resp.error)
             return False
@@ -170,6 +171,8 @@ class UsersUtil:
         self._logger.debug('User %s@%s (id %s) host_is_null: %s requested from database',
                            handle, host, global_id, host_is_null)
         host = self._activ_util.normalise_hostname(host) if host else host
+
+        # Check for empty search
         user_entry = database_pb2.UsersEntry(
             handle=handle,
             host=host,
@@ -191,9 +194,9 @@ class UsersUtil:
             return find_resp.results[0]
         else:
             self._logger.error('> 1 user found in database for %s@%s (id %s)'
-                               + ', returning first one.',
+                               + ', returning None.',
                                handle, host, global_id)
-            return find_resp.results[0]
+            return None
 
     def get_follower_list(self, user_id):
         follow_entry = database_pb2.Follow(
@@ -204,7 +207,7 @@ class UsersUtil:
             match=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 "Find for followers of id: %s returned error: %s",
                 user_id,

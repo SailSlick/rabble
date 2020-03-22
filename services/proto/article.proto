@@ -3,6 +3,7 @@ syntax = "proto3";
 option go_package = "services/proto";
 
 import "google/protobuf/timestamp.proto";
+import "services/proto/general.proto";
 
 // NewArticle has the same contents as request from client with timestamp
 // converted to protobuf format.
@@ -21,11 +22,6 @@ message NewArticle {
 // NewArticleResponse is a simple response.
 // global_id is included to be sent back to display on client side
 message NewArticleResponse {
-    enum ResultType {
-        OK = 0;
-        ERROR = 1;
-    }
-
     ResultType result_type = 1;
     string global_id = 2;
 
@@ -34,11 +30,6 @@ message NewArticleResponse {
 }
 
 message PreviewResponse {
-    enum ResultType {
-        OK = 0;
-        ERROR = 1;
-    }
-
     ResultType result_type = 1;
     NewArticle preview = 2;
 

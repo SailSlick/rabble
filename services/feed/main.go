@@ -50,7 +50,7 @@ func (s *server) getFollows(ctx context.Context, u *pb.UsersEntry) ([]*pb.Follow
 	if err != nil {
 		return nil, fmt.Errorf(errorFmt, *u, err)
 	}
-	if resp.ResultType != pb.DbFollowResponse_OK {
+	if resp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(errorFmt, *u, resp.Error)
 	}
 
@@ -94,7 +94,7 @@ func (s *server) GetUserFeed(ctx context.Context, r *pb.FeedRequest) (*pb.FeedRe
 			log.Print(err)
 			return nil, err
 		}
-		if resp.ResultType != pb.PostsResponse_OK {
+		if resp.ResultType != pb.ResultType_OK {
 			err := fmt.Errorf(feedErr, r.UserId, resp.Error)
 			log.Print(err)
 			return nil, err
@@ -117,7 +117,7 @@ func (s *server) GetUserFeed(ctx context.Context, r *pb.FeedRequest) (*pb.FeedRe
 			log.Print(err)
 			return nil, err
 		}
-		if sharesResp.ResultType != pb.SharesResponse_OK {
+		if sharesResp.ResultType != pb.ResultType_OK {
 			err := fmt.Errorf(feedErr, r.UserId, sharesResp.Error)
 			log.Print(err)
 			return nil, err
@@ -151,7 +151,7 @@ func (s *server) Get(ctx context.Context, r *pb.FeedRequest) (*pb.FeedResponse, 
 	if err != nil {
 		return nil, fmt.Errorf(instanceFeedErrFmt, *pr, err)
 	}
-	if resp.ResultType != pb.PostsResponse_OK {
+	if resp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(instanceFeedErrFmt, *pr, resp.Error)
 	}
 	fp := &pb.FeedResponse{}
@@ -176,7 +176,7 @@ func (s *server) PerArticle(ctx context.Context, r *pb.ArticleRequest) (*pb.Feed
 		log.Printf(postsErrFmt, *pr, err)
 		return nil, fmt.Errorf(postsErrFmt, *pr, err)
 	}
-	if resp.ResultType != pb.PostsResponse_OK {
+	if resp.ResultType != pb.ResultType_OK {
 		log.Printf(postsErrFmt, *pr, resp.Error)
 		return nil, fmt.Errorf(postsErrFmt, *pr, resp.Error)
 	}
@@ -232,7 +232,7 @@ func (s *server) checkFollowing(follower_id int64, followed_id int64) (bool, err
 	if err != nil {
 		return false, fmt.Errorf(followErrFmt, err)
 	}
-	if resp.ResultType != pb.DbFollowResponse_OK {
+	if resp.ResultType != pb.ResultType_OK {
 		return false, fmt.Errorf(followErrFmt, resp.Error)
 	}
 
@@ -288,7 +288,7 @@ func (s *server) PerUser(ctx context.Context, r *pb.FeedRequest) (*pb.FeedRespon
 	if err != nil {
 		return nil, fmt.Errorf(postsErrFmt, *pr, err)
 	}
-	if resp.ResultType != pb.PostsResponse_OK {
+	if resp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(postsErrFmt, *pr, resp.Error)
 	}
 
@@ -306,7 +306,7 @@ func (s *server) PerUser(ctx context.Context, r *pb.FeedRequest) (*pb.FeedRespon
 	if err != nil {
 		return nil, fmt.Errorf(shareErrFmt, *spr, err)
 	}
-	if shareResp.ResultType != pb.SharesResponse_OK {
+	if shareResp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(shareErrFmt, *spr, shareResp.Error)
 	}
 	fp := &pb.FeedResponse{}

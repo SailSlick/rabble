@@ -1,7 +1,7 @@
 from services.proto import database_pb2 as db_pb
-from services.proto import announce_pb2
 from services.proto import article_pb2
-from announce_util import AnnounceUtil
+from services.proto import general_pb2
+from activities.announce.announce_util import AnnounceUtil
 
 
 class ReceiveAnnounceServicer:
@@ -35,8 +35,8 @@ class ReceiveAnnounceServicer:
             "Received error while parsing %s author id: %s",
             actor_name,
             actor_id)
-        return announce_pb2.AnnounceResponse(
-            result_type=announce_pb2.AnnounceResponse.ERROR,
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.ERROR_400,
             error="Could not parse {} author id".format(actor_name),
         )
 
@@ -66,7 +66,7 @@ class ReceiveAnnounceServicer:
             ap_id=req.announced_object,
         )
         article_resp = self._article_stub.CreateNewArticle(na)
-        if article_resp.result_type == article_pb2.NewArticleResponse.ERROR:
+        if article_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 "New foreign article creation returned error: %s",
                 article_resp.error
@@ -92,17 +92,17 @@ class ReceiveAnnounceServicer:
         )
         # check if share already exists
         resp = self._db.FindShare(req)
-        if resp.result_type == db_pb.FindShareResponse.OK and resp.exists:
+        if resp.result_type == general_pb2.ResultType.OK and resp.exists:
             # Share exists. return success
             return None
 
         resp = self._db.AddShare(req)
-        if resp.result_type != db_pb.AddShareResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.error(
                 "Received error while adding share %s",
                 resp.error)
-            return announce_pb2.AnnounceResponse(
-                result_type=announce_pb2.AnnounceResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Could not add share to db {}".format(resp.error),
             )
         return None
@@ -113,8 +113,8 @@ class ReceiveAnnounceServicer:
                            req.announced_object,
                            req.announcer_id,
                            req.announce_time.seconds)
-        response = announce_pb2.AnnounceResponse(
-            result_type=announce_pb2.AnnounceResponse.OK)
+        response = general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK)
 
         # Parse announcer, author and target ids
         author_tuple = self._users_util.parse_actor_details(req.author_ap_id)
@@ -138,8 +138,8 @@ class ReceiveAnnounceServicer:
                 # If announcer & author doesn't exist, announce is error
                 self._logger.error(
                     "Received announce without knowing author or announcer")
-                return announce_pb2.AnnounceResponse(
-                    result_type=announce_pb2.AnnounceResponse.ERROR,
+                return general_pb2.GeneralResponse(
+                    result_type=general_pb2.ResultType.ERROR_400,
                     error="Received announce without knowing author or announcer",
                 )
 
@@ -152,8 +152,8 @@ class ReceiveAnnounceServicer:
             if article is None:
                 self._logger.debug(
                     "Issue creating new article from unknown author")
-                return announce_pb2.AnnounceResponse(
-                    result_type=announce_pb2.AnnounceResponse.ERROR,
+                return general_pb2.GeneralResponse(
+                    result_type=general_pb2.ResultType.ERROR,
                     error="Could not create local version of article id: {}".format(
                         req.announced_object),
                 )
@@ -174,8 +174,8 @@ class ReceiveAnnounceServicer:
                 # This is a bad request.
                 self._logger.error(
                     "Received announce with local author for post that doesn't exist")
-                return announce_pb2.AnnounceResponse(
-                    result_type=announce_pb2.AnnounceResponse.ERROR,
+                return general_pb2.GeneralResponse(
+                    result_type=general_pb2.ResultType.ERROR_400,
                     error="Announce with local author for post that doesn't exist",
                 )
             elif err is not None:
@@ -189,8 +189,8 @@ class ReceiveAnnounceServicer:
                 # Create post
                 article = self.create_post(author, req)
                 if article is None:
-                    return announce_pb2.AnnounceResponse(
-                        result_type=announce_pb2.AnnounceResponse.ERROR,
+                    return general_pb2.GeneralResponse(
+                        result_type=general_pb2.ResultType.ERROR,
                         error="Could not create local version of article id: {}".format(
                             req.announced_object),
                     )

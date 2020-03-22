@@ -1,5 +1,5 @@
 from services.proto import database_pb2 as dbpb
-from services.proto import update_pb2 as upb
+from services.proto import general_pb2
 from utils.articles import get_article, convert_to_tags_string, md_to_html
 
 
@@ -26,7 +26,7 @@ class SendUpdateServicer:
                 summary=req.summary,
             ),
         ))
-        if resp.result_type != dbpb.PostsResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.error("Could not update article: %s", resp.error)
             return False
         return True
@@ -55,25 +55,27 @@ class SendUpdateServicer:
                           req.article_id, req.user_id)
         user = self._users_util.get_user_from_db(global_id=req.user_id)
         if user is None:
-            return upb.UpdateResponse(
-                result_type=upb.UpdateResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Error retrieving user",
             )
         article = get_article(self._logger, self._db, global_id=req.article_id)
         if article is None:
-            return upb.UpdateResponse(
-                result_type=upb.UpdateResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Error retrieving article",
             )
         if article.author_id != user.global_id:
             self._logger.warning(
                 "User %d requested to edit article belonging to user %d",
                 req.user_id, article.author_id)
-            return upb.UpdateResponse(result_type=upb.UpdateResponse.DENIED)
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.DENIED
+            )
         # Update article locally
         if not self._update_locally(article, req):
-            return upb.UpdateResponse(
-                result_type=upb.UpdateResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Error updating article",
             )
         # Send out update activity
@@ -82,8 +84,10 @@ class SendUpdateServicer:
         err = self._activ_util.forward_activity_to_followers(
             req.user_id, update_obj)
         if err is not None:
-            return upb.UpdateResponse(
-                result_type=upb.UpdateResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error=err,
             )
-        return upb.UpdateResponse(result_type=upb.UpdateResponse.OK)
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
+        )

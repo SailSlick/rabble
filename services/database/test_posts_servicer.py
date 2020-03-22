@@ -2,14 +2,15 @@ import unittest
 import logging
 import os
 
-import posts_servicer
-import users_servicer
-import like_servicer
-import follow_servicer
-import database
+import database.posts_servicer as posts_servicer
+import database.users_servicer as users_servicer
+import database.like_servicer as like_servicer
+import database.follow_servicer as follow_servicer
+import database.db as database
 from services.proto import database_pb2
+from services.proto import general_pb2
 
-POSTS_DB_PATH = "./testdb/posts.db"
+POSTS_DB_PATH = "/repo/build_out/database/testdb/posts.db"
 
 
 class PostsDatabaseHelper(unittest.TestCase):
@@ -20,12 +21,12 @@ class PostsDatabaseHelper(unittest.TestCase):
 
         def fake_context():
             def called():
-                raise NotImplemented
+                raise NotImplementedError
             return called
 
         logger = logging.getLogger()
         self.db = database.build_database(logger,
-                                          "rabble_schema.sql",
+                                          "/repo/build_out/database/rabble_schema.sql",
                                           POSTS_DB_PATH)
         self.addCleanup(clean_database)
         self.posts = posts_servicer.PostsDatabaseServicer(self.db, logger)
@@ -48,7 +49,7 @@ class PostsDatabaseHelper(unittest.TestCase):
 
         add_res = self.posts.Posts(req, self.ctx)
         self.assertNotEqual(add_res.result_type,
-                            database_pb2.PostsResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return add_res
 
     def add_like(self, liker_id, article_id):
@@ -57,7 +58,8 @@ class PostsDatabaseHelper(unittest.TestCase):
             article_id=article_id,
         )
         res = self.like.AddLike(req, self.ctx)
-        self.assertNotEqual(res.result_type, database_pb2.DBLikeResponse.ERROR)
+        self.assertNotEqual(
+            res.result_type, general_pb2.ResultType.ERROR)
         return res
 
     def add_follow(self, follower_id, followed_id,
@@ -73,7 +75,7 @@ class PostsDatabaseHelper(unittest.TestCase):
         )
         res = self.follow.Follow(req, self.ctx)
         self.assertNotEqual(res.result_type,
-                            database_pb2.DbFollowResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return res
 
     def add_user(self, handle=None, host=None):
@@ -89,7 +91,7 @@ class PostsDatabaseHelper(unittest.TestCase):
         )
         add_res = self.users.Users(req, self.ctx)
         self.assertNotEqual(add_res.result_type,
-                            database_pb2.UsersResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return add_res
 
     def instance_feed(self, n, user=None):
@@ -97,7 +99,7 @@ class PostsDatabaseHelper(unittest.TestCase):
         if user is not None:
             req.user_global_id.value = user
         res = self.posts.InstanceFeed(req, self.ctx)
-        self.assertNotEqual(res.result_type, database_pb2.PostsResponse.ERROR)
+        self.assertNotEqual(res.result_type, general_pb2.ResultType.ERROR)
         return res
 
     def find_post(self, user, author_id=None):
@@ -108,7 +110,7 @@ class PostsDatabaseHelper(unittest.TestCase):
             req.match.author_id = author_id
         req.user_global_id.value = user
         res = self.posts.Posts(req, self.ctx)
-        self.assertNotEqual(res.result_type, database_pb2.PostsResponse.ERROR)
+        self.assertNotEqual(res.result_type, general_pb2.ResultType.ERROR)
         return res
 
 

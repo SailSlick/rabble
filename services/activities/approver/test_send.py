@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from send import SendApprovalServicer
+from activities.approver.send import SendApprovalServicer
 from services.proto import approver_pb2
 from services.proto import s2s_follow_pb2
 from utils.activities import ActivitiesUtil

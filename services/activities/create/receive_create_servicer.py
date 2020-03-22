@@ -1,6 +1,6 @@
-from services.proto import create_pb2
 from services.proto import database_pb2
 from services.proto import article_pb2
+from services.proto import general_pb2
 from utils.articles import get_article
 
 
@@ -44,7 +44,7 @@ class ReceiveCreateServicer:
             match=follow_entry
         )
         follow_resp = self._db_stub.Follow(follow_req)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 "Check if user id: %s followed %s, returned error: %s",
                 local_user_id,
@@ -78,7 +78,7 @@ class ReceiveCreateServicer:
             summary=req.summary,
         )
         article_resp = self._article_stub.CreateNewArticle(na)
-        if article_resp.result_type == article_pb2.NewArticleResponse.ERROR:
+        if article_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 "New foreign article creation returned error: %s",
                 article_resp.error
@@ -88,27 +88,27 @@ class ReceiveCreateServicer:
 
     def ReceiveCreate(self, req, context):
         self._logger.debug("Recieved a new create notification.")
-        resp = create_pb2.CreateResponse()
+        resp = general_pb2.GeneralResponse()
 
         # get actor ids
         author_id, follower_id = self._get_actor_ids(
             req.attributedTo, req.recipient)
         if author_id is None:
-            resp.result_type = create_pb2.CreateResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR_400
             return resp
 
         # check if local user follows
         follower_flag = self._check_follow(author_id, follower_id)
-        if follower_flag == False:
-            resp.result_type = create_pb2.CreateResponse.ERROR
+        if follower_flag is False:
+            resp.result_type = general_pb2.ResultType.ERROR
             return resp
 
         # add to article db
         added_flag = self._add_to_posts_db(author_id, req)
-        if added_flag == False:
-            resp.result_type = create_pb2.CreateResponse.ERROR
+        if added_flag is False:
+            resp.result_type = general_pb2.ResultType.ERROR
             return resp
 
         self._logger.debug("Recieve create Article success")
-        resp.result_type = create_pb2.CreateResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         return resp

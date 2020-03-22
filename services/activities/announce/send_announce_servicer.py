@@ -1,6 +1,6 @@
 from services.proto import database_pb2
-from services.proto import announce_pb2
-from announce_util import AnnounceUtil
+from services.proto import general_pb2
+from activities.announce.announce_util import AnnounceUtil
 
 
 class SendAnnounceServicer:
@@ -22,7 +22,7 @@ class SendAnnounceServicer:
             ),
         )
         resp = self._db.Posts(posts_req)
-        if resp.result_type != database_pb2.PostsResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             return None, resp.error
         elif len(resp.results) > 1:
             return None, "Recieved too many results from DB"
@@ -35,30 +35,30 @@ class SendAnnounceServicer:
                            req.article_id,
                            req.announcer_id,
                            req.announce_time.seconds)
-        response = announce_pb2.AnnounceResponse(
-            result_type=announce_pb2.AnnounceResponse.OK)
+        response = general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK)
 
         announcer = self._users_util.get_user_from_db(
             global_id=req.announcer_id)
         if announcer is None:
-            response.result_type = announce_pb2.AnnounceResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR_400
             response.error = "Announcer does not exist"
             return response
 
         # Get post author & reblogged article
         article, err = self._get_shared_article(req.article_id)
         if err is not None:
-            response.result_type = announce_pb2.AnnounceResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR_400
             response.error = "Shared Article does not exist"
             return response
 
         author = self._users_util.get_user_from_db(global_id=article.author_id)
         if author is None:
-            response.result_type = announce_pb2.AnnounceResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR_400
             response.error = "Author of shared post does not exist"
             return response
         if author.global_id == announcer.global_id:
-            response.result_type = announce_pb2.AnnounceResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR_400
             response.error = "Author cannot share their own post"
             return response
 

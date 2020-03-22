@@ -1,5 +1,6 @@
 from services.proto import actors_pb2
 from services.proto import follows_pb2
+from services.proto import general_pb2
 import json
 
 
@@ -43,7 +44,7 @@ class CollectionServicer:
         followsRequest = follows_pb2.GetFollowsRequest(username=user.handle)
         gfr = self._follows_stub.GetFollowing(followsRequest)
 
-        if gfr.result_type == follows_pb2.GetFollowsResponse.ERROR:
+        if gfr.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 "GetFollowing for following collection returned error: %s",
                 gfr.error
@@ -64,7 +65,7 @@ class CollectionServicer:
         followsRequest = follows_pb2.GetFollowsRequest(username=user.handle)
         gfr = self._follows_stub.GetFollowers(followsRequest)
 
-        if gfr.result_type == follows_pb2.GetFollowsResponse.ERROR:
+        if gfr.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 "GetFollowers for followers collection returned error: %s",
                 gfr.error

@@ -2,16 +2,13 @@ syntax = "proto3";
 
 option go_package = "services/proto";
 
+import "services/proto/general.proto";
+
 message NormaliseRequest {
   string json = 1;
 }
 
 message NormaliseResponse {
-  enum ResultType {
-    OK    = 0;
-    ERROR = 1;
-  }
-
   ResultType result_type = 1;
   string normalised = 2;
 }
@@ -19,4 +16,3 @@ message NormaliseResponse {
 service LDNorm {
   rpc Normalise(NormaliseRequest) returns (NormaliseResponse);
 }
-

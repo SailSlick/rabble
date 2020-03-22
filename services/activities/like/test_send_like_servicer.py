@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 from send_like_servicer import SendLikeServicer
 from services.proto import like_pb2
 from services.proto import database_pb2
+from services.proto import general_pb2
 from utils.activities import ActivitiesUtil
 from utils.users import UsersUtil
 
@@ -11,7 +12,7 @@ from utils.users import UsersUtil
 class MockDB:
     def __init__(self):
         self.posts_response = database_pb2.PostsResponse(
-            result_type=database_pb2.PostsResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[
                 database_pb2.PostsEntry(
                     global_id=123,
@@ -23,7 +24,7 @@ class MockDB:
             ]
         )
         self.users_response = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[
                 database_pb2.UsersEntry(
                     global_id=456,
@@ -65,7 +66,7 @@ class SendLikeServicerTest(unittest.TestCase):
             liker_handle="farmlover73",
         )
         resp = self.servicer.SendLikeActivity(req, None)
-        self.assertEqual(resp.result_type, like_pb2.LikeResponse.OK)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.OK)
         # Check that the request sent makes sense.
         self.assertEqual(self.data["type"], "Like")
         self.assertEqual(self.data["actor"]["type"], "Person")
@@ -86,7 +87,7 @@ class SendLikeServicerTest(unittest.TestCase):
         self.db.posts_response.results[0].ClearField('ap_id')
         self.db.users_response.results[0].ClearField('host')
         resp = self.servicer.SendLikeActivity(req, None)
-        self.assertEqual(resp.result_type, like_pb2.LikeResponse.OK)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.OK)
         # Check that the request sent makes sense.
         self.assertEqual(self.data["type"], "Like")
         self.assertEqual(self.data["actor"]["type"], "Person")
@@ -106,7 +107,7 @@ class SendLikeServicerTest(unittest.TestCase):
         )
         self.activ_util.send_activity = lambda *_: ("", "Error 404")
         resp = self.servicer.SendLikeActivity(req, None)
-        self.assertEqual(resp.result_type, like_pb2.LikeResponse.ERROR)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.ERROR)
 
     def test_SendLikeActivityNoArticle(self):
         req = like_pb2.LikeDetails(
@@ -114,8 +115,8 @@ class SendLikeServicerTest(unittest.TestCase):
             liker_handle="farmlover73",
         )
         self.db.Posts = lambda *_: database_pb2.PostsResponse(
-            result_type=database_pb2.PostsResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[],
         )
         resp = self.servicer.SendLikeActivity(req, None)
-        self.assertEqual(resp.result_type, like_pb2.LikeResponse.ERROR)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.ERROR)

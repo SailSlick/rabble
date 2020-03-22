@@ -40,6 +40,30 @@ type userResponse struct {
 	UserID  int64  `json:"user_id"`
 }
 
+func (s *serverWrapper) getSessionHandle(r *http.Request) (string, error) {
+	session, err := s.store.Get(r, "rabble-session")
+	if err != nil {
+		log.Printf("Error getting session: %v", err)
+		return "", err
+	}
+	if _, ok := session.Values["handle"]; !ok {
+		return "", fmt.Errorf("Handle doesn't exist, user not logged in")
+	}
+	return session.Values["handle"].(string), nil
+}
+
+func (s *serverWrapper) getSessionGlobalID(r *http.Request) (int64, error) {
+	session, err := s.store.Get(r, "rabble-session")
+	if err != nil {
+		log.Printf("Error getting session: %v", err)
+		return 0, err
+	}
+	if _, ok := session.Values["global_id"]; !ok {
+		return 0, fmt.Errorf("Global ID doesn't exist, user not logged in")
+	}
+	return session.Values["global_id"].(int64), nil
+}
+
 // handleLogin sends an RPC to the users service to check if a login
 // is correct.
 func (s *serverWrapper) handleLogin() http.HandlerFunc {
@@ -165,7 +189,7 @@ func (s *serverWrapper) handleRegister() http.HandlerFunc {
 			log.Printf("could not add new user: %v", err)
 			jsonResp.Error = "Error communicating with create user service"
 			w.WriteHeader(http.StatusInternalServerError)
-		} else if resp.ResultType != pb.CreateUserResponse_OK {
+		} else if resp.ResultType != pb.ResultType_OK {
 			log.Printf("Error creating user: %s", resp.Error)
 			jsonResp.Error = resp.Error
 			w.WriteHeader(http.StatusInternalServerError)
@@ -348,7 +372,7 @@ func (s *serverWrapper) handleUserCSS() http.HandlerFunc {
 			log.Printf("Error in users.GetCss: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		} else if resp.Result != pb.GetCssResponse_OK {
+		} else if resp.Result != pb.ResultType_OK {
 			log.Printf("Error getting css: %s", resp.Error)
 			w.WriteHeader(http.StatusInternalServerError)
 			return

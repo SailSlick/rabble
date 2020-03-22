@@ -1,6 +1,7 @@
 import sqlite3
 
 from services.proto import database_pb2 as db_pb
+from services.proto import general_pb2
 
 
 class LikeDatabaseServicer:
@@ -14,7 +15,7 @@ class LikeDatabaseServicer:
             req.article_id
         )
         response = db_pb.LikesCollectionResponse(
-            result_type=db_pb.LikesCollectionResponse.OK,
+            result_type=general_pb2.ResultType.OK,
         )
         try:
             res = self._db.execute(
@@ -25,7 +26,7 @@ class LikeDatabaseServicer:
                 [u[0] for u in res])
         except sqlite3.Error as e:
             self._logger.error("LikesCollection error: %s", str(e))
-            response.result_type = db_pb.LikesCollectionResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = str(e)
         return response
 
@@ -35,7 +36,7 @@ class LikeDatabaseServicer:
             req.user_id
         )
         response = db_pb.LikedCollectionResponse(
-            result_type=db_pb.LikedCollectionResponse.OK,
+            result_type=general_pb2.ResultType.OK,
         )
         try:
             res = self._db.execute(
@@ -48,7 +49,7 @@ class LikeDatabaseServicer:
                 [p[0] for p in res])
         except sqlite3.Error as e:
             self._logger.error("LikedCollection error: %s", str(e))
-            response.result_type = db_pb.LikedCollectionResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = str(e)
         return response
 
@@ -57,8 +58,8 @@ class LikeDatabaseServicer:
             "Adding like by %d to article %d",
             req.user_id, req.article_id
         )
-        response = db_pb.DBLikeResponse(
-            result_type=db_pb.DBLikeResponse.OK
+        response = general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
         )
         try:
             self._db.execute(
@@ -76,7 +77,7 @@ class LikeDatabaseServicer:
         except sqlite3.Error as e:
             self._db.discard_cursor()
             self._logger.error("AddLike error: %s", str(e))
-            response.result_type = db_pb.DBLikeResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = str(e)
         return response
 
@@ -84,8 +85,8 @@ class LikeDatabaseServicer:
         self._logger.debug(
             "Removing like by %d to article %d",
             req.user_id, req.article_id)
-        response = db_pb.DBLikeResponse(
-            result_type=db_pb.DBLikeResponse.OK
+        response = general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
         )
         try:
             self._db.execute(
@@ -100,7 +101,6 @@ class LikeDatabaseServicer:
         except sqlite3.Error as e:
             self._db.discard_cursor()
             self._logger.error("RemoveLike error %s", str(e))
-            response.result_type = db_ob.DBLikeResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = str(e)
         return response
-

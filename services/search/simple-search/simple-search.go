@@ -62,9 +62,9 @@ func (s *Server) CreateIndices() {
 }
 
 // Index Simple search does not need to be called to index so this is a no-op
-func (s *Server) Index(ctx context.Context, r *pb.IndexRequest) (*pb.IndexResponse, error) {
+func (s *Server) Index(ctx context.Context, r *pb.IndexRequest) (*pb.GeneralResponse, error) {
 	// hey there, i'm all good, i dont need to index, thanks for asking
-	return &pb.IndexResponse{}, nil
+	return &pb.GeneralResponse{}, nil
 }
 
 // Search is the handler for all search calls to the simple-search

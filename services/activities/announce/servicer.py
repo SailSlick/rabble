@@ -1,7 +1,7 @@
 from services.proto import announce_pb2_grpc
 
-from send_announce_servicer import SendAnnounceServicer
-from receive_announce_servicer import ReceiveAnnounceServicer
+from activities.announce.send_announce_servicer import SendAnnounceServicer
+from activities.announce.receive_announce_servicer import ReceiveAnnounceServicer
 
 
 class AnnounceServicer(announce_pb2_grpc.AnnounceServicer):

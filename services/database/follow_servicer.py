@@ -1,8 +1,9 @@
 import sqlite3
 
-import util
+import database.util as util
 
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 
 class FollowDatabaseServicer:
@@ -44,7 +45,7 @@ class FollowDatabaseServicer:
         self._logger.info('Inserting new follow into Follow database.')
         # Make sure that we always set state with a default value of ACTIVE.
         state = req.entry.state
-        if state == None:
+        if state is None:
             state = database_pb2.Follow.ACTIVE
         try:
             self._db.execute(
@@ -56,10 +57,10 @@ class FollowDatabaseServicer:
                 state)
         except sqlite3.Error as e:
             self._logger.error(str(e))
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.DbFollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
 
     def _follow_handle_find(self, req, resp):
         default = [("state", database_pb2.Follow.ACTIVE)]
@@ -71,7 +72,7 @@ class FollowDatabaseServicer:
                     'SELECT * FROM follows',
                 )
                 self._logger.warning(err)
-                resp.result_type = database_pb2.DbFollowResponse.ERROR
+                resp.result_type = general_pb2.ResultType.ERROR
                 resp.error = err
                 return
             else:
@@ -82,10 +83,10 @@ class FollowDatabaseServicer:
                 res = self._db.execute(query, *values)
         except sqlite3.Error as e:
             self._logger.warning('Got error reading DB: ' + str(e))
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.DbFollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         for tup in res:
             if not self._db_tuple_to_entry(tup, resp.results.add()):
                 del resp.results[-1]
@@ -94,18 +95,18 @@ class FollowDatabaseServicer:
 
     def _follow_handle_update(self, req, resp):
         if not req.HasField("match") or not req.HasField("entry"):
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "bad parameters: please set both match and entry"
             return
 
         if not req.match.follower or not req.match.followed:
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "bad parameters: please set both follower and followed"
             return
 
         filter_clause, values = util.equivalent_filter(req.match)
         if not filter_clause:
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "could not create filter for UPDATE"
             return
 
@@ -117,17 +118,17 @@ class FollowDatabaseServicer:
             count = self._db.execute_count(query, req.entry.state, *values)
         except sqlite3.Error as e:
             self._logger.warning('Got error writing to DB: ' + str(e))
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
 
         if count != 1:
             err = 'UPDATE affected {} rows, expected 1'.format(count)
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             self._logger.warning(err)
             resp.error = err
 
-        resp.result_type = database_pb2.DbFollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
 
     def _follow_handle_delete(self, req, resp):
         self._logger.info('Deleting follow from Follow database.')
@@ -138,7 +139,7 @@ class FollowDatabaseServicer:
             self._db.execute(query, *values)
         except sqlite3.Error as e:
             self._logger.error(str(e))
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.DbFollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK

@@ -3,15 +3,13 @@ from concurrent import futures
 import argparse
 import grpc
 import time
-import os
-import sys
 
 from utils.logger import get_logger
 from utils.users import UsersUtil
 from utils.activities import ActivitiesUtil
 from utils.connect import get_future_channel
 
-from servicer import FollowServicer
+from activities.follow.servicer import FollowServicer
 from services.proto import follows_pb2_grpc
 from services.proto import s2s_follow_pb2_grpc
 from services.proto import database_pb2_grpc
@@ -36,7 +34,8 @@ def main():
         follows_service = follows_pb2_grpc.FollowsStub(logger_chan)
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         s2s_follow_pb2_grpc.add_S2SFollowServicer_to_server(
-            FollowServicer(logger, users_util, activ_util, follows_service, db_stub),
+            FollowServicer(logger, users_util, activ_util,
+                           follows_service, db_stub),
             server
         )
         server.add_insecure_port('0.0.0.0:1922')

@@ -1,9 +1,9 @@
 from services.proto import article_pb2
 from services.proto import database_pb2
 from services.proto import create_pb2
-from services.proto import mdc_pb2
 from services.proto import recommend_posts_pb2
 from services.proto import search_pb2
+from services.proto import general_pb2
 from utils.articles import convert_to_tags_string, md_to_html
 
 
@@ -32,7 +32,7 @@ class NewArticleServicer:
         if resp.error:
             self._logger.warning("Error indexing post: %s", resp.error)
 
-        return resp.result_type == search_pb2.IndexResponse.ResultType.Value("OK")
+        return resp.result_type == general_pb2.ResultType.OK
 
     def send_insert_request(self, req):
         global_id = req.author_id
@@ -60,7 +60,7 @@ class NewArticleServicer:
             entry=pe
         )
         posts_resp = self._db_stub.Posts(pr)
-        if posts_resp.result_type == database_pb2.PostsResponse.ERROR:
+        if posts_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 'Could not insert into db: %s', posts_resp.error)
 
@@ -90,7 +90,7 @@ class NewArticleServicer:
 
     def _add_post_to_recommender(self, post_entry):
         resp = self._post_recommendation_stub.AddPost(post_entry)
-        if resp.result_type != recommend_posts_pb2.PostRecommendationsResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.error(
                 "AddPost for post recommendation failed: %s", resp.message)
 
@@ -99,16 +99,16 @@ class NewArticleServicer:
         success, global_id = self.send_insert_request(req)
 
         resp = article_pb2.NewArticleResponse()
-        if success == database_pb2.PostsResponse.OK:
+        if success == general_pb2.ResultType.OK:
             self._logger.info('Article created.')
-            resp.result_type = article_pb2.NewArticleResponse.OK
+            resp.result_type = general_pb2.ResultType.OK
             if not req.foreign:
                 # TODO (sailslick) persist create activities
                 # or add to queueing service
                 create_success = self.send_create_activity_request(
                     req, global_id)
-                if create_success == create_pb2.CreateResponse.ERROR:
+                if create_success == general_pb2.ResultType.ERROR:
                     self._logger.error('Could not send create Activity')
         else:
-            resp.result_type = article_pb2.NewArticleResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
         return resp

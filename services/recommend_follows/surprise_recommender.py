@@ -1,9 +1,9 @@
 import random
 
 from collections import defaultdict
-from enum import Enum
 
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 import pandas as pd
 
@@ -26,7 +26,7 @@ class SurpriseRecommender:
             request_type=database_pb2.DbFollowRequest.FIND,
             match=None)
         follow_resp = self._db.Follow(follow_req)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error('Could not get follows from database: %s',
                                follow_resp.error)
         return follow_resp

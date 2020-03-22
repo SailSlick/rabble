@@ -5,8 +5,9 @@ import grpc
 import logging
 import time
 
-from logger_servicer import LoggerServicer
+from logger.logger_servicer import LoggerServicer
 from services.proto import logger_pb2_grpc
+
 
 def get_args():
     parser = argparse.ArgumentParser('Run the Rabble logger microservice')
@@ -14,7 +15,7 @@ def get_args():
         '-v', default='WARNING', action='store_const', const='DEBUG',
         help='Log more verbosely.')
     parser.add_argument('-f', default='rabble.log',
-        help='The file to write logs to')
+                        help='The file to write logs to')
     return parser.parse_args()
 
 
@@ -48,6 +49,7 @@ def main():
             time.sleep(60 * 60 * 24)  # One day
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == '__main__':
     main()

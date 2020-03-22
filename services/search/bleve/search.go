@@ -157,7 +157,7 @@ func (s *Server) Search(ctx context.Context, r *pb.SearchRequest) (*pb.SearchRes
 	return resp, nil
 }
 
-func (s *Server) Index(ctx context.Context, r *pb.IndexRequest) (*pb.IndexResponse, error) {
+func (s *Server) Index(ctx context.Context, r *pb.IndexRequest) (*pb.GeneralResponse, error) {
 	const (
 		convErr = "util.ConvertDBToFeed: couldn't convert PostsEntry to Post type: bad results"
 	)
@@ -170,14 +170,14 @@ func (s *Server) Index(ctx context.Context, r *pb.IndexRequest) (*pb.IndexRespon
 
 	if err := s.addToIndex(p[0]); err != nil {
 		log.Printf("Error adding to index: %v", err.Error())
-		return &pb.IndexResponse{
-			ResultType: pb.IndexResponse_ERROR,
+		return &pb.GeneralResponse{
+			ResultType: pb.ResultType_ERROR,
 			Error:      err.Error(),
 		}, nil
 	}
 
 	log.Printf("Indexed article with id %d", p[0].GlobalId)
-	return &pb.IndexResponse{}, nil
+	return &pb.GeneralResponse{}, nil
 }
 
 func main() {

@@ -2,7 +2,7 @@ import os
 import sys
 
 from services.proto import database_pb2
-from services.proto import follows_pb2
+from services.proto import general_pb2
 
 
 class AcceptFollowServicer:
@@ -21,7 +21,7 @@ class AcceptFollowServicer:
                                                      host_is_null=True)
         if not followed:
             self._logger.error('Could not find followed user.')
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = 'Could not find followed user. You do not exist!'
             return None, None
 
@@ -29,7 +29,7 @@ class AcceptFollowServicer:
                                                      host=request.follower.host)
         if not follower:
             self._logger.error('Could not find follower.')
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = 'Could not find follower.'
             return None, None
         return follower, followed
@@ -44,12 +44,12 @@ class AcceptFollowServicer:
             match=match,
         )
 
-        resp = self._db_stub.Follow(req)
-        if resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        db_resp = self._db_stub.Follow(req)
+        if db_resp.result_type == general_pb2.ResultType.ERROR:
             err = "Could not get follow database: " + resp.error
             self._logger.error(err)
             resp.error = err
-            resp.result_type = database_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             return err
 
     def _modify_follow(self, resp, follower_id, followed_id, is_accepted):
@@ -70,19 +70,19 @@ class AcceptFollowServicer:
             entry=entry,
         )
 
-        resp = self._db_stub.Follow(req)
-        if resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        db_resp = self._db_stub.Follow(req)
+        if db_resp.result_type == general_pb2.ResultType.ERROR:
             err = "Could not modify follow: " + resp.error
             self._logger.error(err)
             resp.error = err
-            resp.result_type = database_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             return err
 
     def AcceptFollow(self, request, context):
-        resp = follows_pb2.FollowResponse()
+        resp = general_pb2.GeneralResponse()
         if not request.handle or not request.follower.handle:
             self._logger.error('Error accepting follow: bad arguments')
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = 'Could not accept follow.'
             return resp
 

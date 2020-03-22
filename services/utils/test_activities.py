@@ -1,13 +1,15 @@
+import os
 import unittest
-from unittest.mock import Mock, patch
 
+from unittest.mock import Mock
 from utils.activities import ActivitiesUtil
 
 
 class ActivitiesUtilTest(unittest.TestCase):
     def setUp(self):
+        os.environ["HOST_NAME"] = "b.com"
         self.activ_util = ActivitiesUtil(Mock(), Mock())
-        self.activ_util._host_name = 'b.com'
+        self.activ_util._hostname = 'b.com'
 
     def test_build_local_actor_url(self):
         self.assertEqual(self.activ_util._build_local_actor_url('a', 'b.com'),

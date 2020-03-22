@@ -1,4 +1,5 @@
 from services.proto import approver_pb2
+from services.proto import general_pb2
 
 
 class SendApprovalServicer:
@@ -33,7 +34,7 @@ class SendApprovalServicer:
         return user.global_id
 
     def SendApproval(self, req, context):
-        resp = approver_pb2.ApprovalResponse()
+        resp = general_pb2.GeneralResponse()
         url = self._activ_util.build_inbox_url(req.follow.follower.handle,
                                                req.follow.follower.host)
         activity = self._build_activity(req)
@@ -44,6 +45,6 @@ class SendApprovalServicer:
                                                 sender_id=sender_id)
         if err is not None:
             resp.error = err
-            resp.result_type = approver_pb2.ApprovalResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
 
         return resp

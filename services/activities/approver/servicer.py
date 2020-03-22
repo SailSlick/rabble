@@ -1,6 +1,7 @@
-from send import SendApprovalServicer
-from receive import ReceiveApprovalServicer
+from activities.approver.send import SendApprovalServicer
+from activities.approver.receive import ReceiveApprovalServicer
 from services.proto import approver_pb2_grpc
+
 
 class ApproverServicer(approver_pb2_grpc.ApproverServicer):
     def __init__(self, logger, db_stub, activ_util, users_util):

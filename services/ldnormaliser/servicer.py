@@ -3,6 +3,8 @@ from pyld import jsonld
 
 from services.proto import ldnorm_pb2_grpc
 from services.proto import ldnorm_pb2 as lpb2
+from services.proto import general_pb2
+
 
 class LDNormServicer(ldnorm_pb2_grpc.LDNormServicer):
     def __init__(self, logger):
@@ -17,14 +19,16 @@ class LDNormServicer(ldnorm_pb2_grpc.LDNormServicer):
 
     def Normalise(self, request, context):
         self._logger.debug('Got normalise request for: %s', request.json)
-        resp = lpb2.NormaliseResponse(result_type=lpb2.NormaliseResponse.OK)
+        resp = lpb2.NormaliseResponse(
+            result_type=general_pb2.ResultType.OK
+        )
         try:
             resp.normalised = self._norm(request.json)
         except (Exception, jsonld.JsonLdError) as e:
             # For some reason JsonLdError doesn't inherit from Exception so it
             # has to be caught seperately, it also has a super long message
             # (~20 lines) so I truncate it.
-            self._logger.error("JSON-LD could not be normalised: %s", str(e)[:50])
-            resp.result_type = lpb2.NormaliseResponse.ERROR
+            self._logger.error(
+                "JSON-LD could not be normalised: %s", str(e)[:50])
+            resp.result_type = general_pb2.ResultType.ERROR
         return resp
-

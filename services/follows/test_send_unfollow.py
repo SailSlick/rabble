@@ -2,10 +2,10 @@ import unittest
 import os
 from unittest.mock import Mock
 
-from send_unfollow import SendUnfollowServicer
-from test_receive_follow import FakeDatabase
+from follows.send_unfollow import SendUnfollowServicer
+from follows.test_receive_follow import FakeDatabase
 from services.proto import follows_pb2
-from services.proto import database_pb2
+from services.proto import general_pb2
 
 
 class SendUnfollowTest(unittest.TestCase):
@@ -38,13 +38,13 @@ class SendUnfollowTest(unittest.TestCase):
             followed="jerry@mouse.house",
         )
         res = self.servicer.SendUnfollow(req, Mock())
-        self.assertEqual(res.result_type, follows_pb2.FollowResponse.OK)
+        self.assertEqual(res.result_type, general_pb2.ResultType.OK)
         self.assertIsNotNone(self.db.follow_called_with)
         self.db.reset()
 
     def test_errors_when_empty_request(self):
         req = follows_pb2.LocalToAnyFollow()
         res = self.servicer.SendUnfollow(req, Mock())
-        self.assertEqual(res.result_type, follows_pb2.FollowResponse.ERROR)
+        self.assertEqual(res.result_type, general_pb2.ResultType.ERROR)
         self.assertIsNone(self.db.follow_called_with)
         self.db.reset()

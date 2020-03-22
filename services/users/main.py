@@ -2,13 +2,11 @@
 from concurrent import futures
 import argparse
 import grpc
-import os
-import sys
 import time
 
 from utils.connect import get_service_channel
 from utils.logger import get_logger
-from users_servicer import UsersServicer
+from users.users_servicer import UsersServicer
 from services.proto import users_pb2_grpc
 from services.proto import database_pb2_grpc
 
@@ -16,6 +14,7 @@ from services.proto import database_pb2_grpc
 def get_db_stub(logger):
     chan = get_service_channel(logger, "DB_SERVICE_HOST", 1798)
     return database_pb2_grpc.DatabaseStub(chan)
+
 
 def get_args():
     parser = argparse.ArgumentParser('Run the Rabble users microservice')
@@ -41,6 +40,7 @@ def main():
             time.sleep(60 * 60 * 24)  # One day
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == '__main__':
     main()

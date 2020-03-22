@@ -1,5 +1,5 @@
 from services.proto import database_pb2
-from services.proto import like_pb2
+from services.proto import general_pb2
 from like_util import build_like_activity
 
 
@@ -31,26 +31,26 @@ class SendLikeServicer:
         )
         self._logger.info("Sending request to DB for article %d", article_id)
         resp = self._db.Posts(req)
-        if resp.result_type == database_pb2.PostsResponse.ERROR:
+        if resp.result_type == general_pb2.ResultType.ERROR:
             return None, resp.error
         elif len(resp.results) != 1:
             return None, "Expected 1 result, got " + str(len(resp.results))
         return resp.results[0], None
 
     def SendLikeActivity(self, req, context):
-        response = like_pb2.LikeResponse(
-            result_type=like_pb2.LikeResponse.OK)
+        response = general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK)
         # Get article from DB
         article, err = self._get_article(req.article_id)
         if err is not None:
             self._logger.error("Error getting article: " + err)
-            response.result_type = like_pb2.LikeResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = err
             return response
         author = self._get_author(article)
         if author is None:
             self._logger.error("Error getting article author from DB")
-            response.result_type = like_pb2.LikeResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = "Error getting article author from DB"
             return response
         activity = build_like_activity(
@@ -59,6 +59,6 @@ class SendLikeServicer:
         inbox = self._activ_util.build_inbox_url(author.handle, author.host)
         resp, err = self._activ_util.send_activity(activity, inbox)
         if err is not None:
-            response.result_type = like_pb2.LikeResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = err
         return response

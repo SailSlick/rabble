@@ -5,6 +5,7 @@ option go_package = "services/proto";
 import "services/proto/database.proto";
 import "services/proto/feed.proto";
 import "google/protobuf/wrappers.proto";
+import "services/proto/general.proto";
 
 // This user is a stripped down version of UsersEntry, see database.proto
 //
@@ -43,16 +44,7 @@ message IndexRequest {
   PostsEntry post = 1;
 }
 
-message IndexResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
-  ResultType result_type = 1;
-  string error = 2;
-}
-
 service Search {
   rpc Search(SearchRequest) returns (SearchResponse);
-  rpc Index(IndexRequest) returns (IndexResponse);
+  rpc Index(IndexRequest) returns (GeneralResponse);
 }

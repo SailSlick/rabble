@@ -2,14 +2,15 @@ import unittest
 import logging
 import os
 
-import posts_servicer
-import users_servicer
-import like_servicer
-import follow_servicer
-import database
+import database.posts_servicer as posts_servicer
+import database.users_servicer as users_servicer
+import database.like_servicer as like_servicer
+import database.follow_servicer as follow_servicer
+import database.db as database
 from services.proto import database_pb2
+from services.proto import general_pb2
 
-USERS_DB_PATH = "./testdb/users.db"
+USERS_DB_PATH = "/repo/build_out/database/testdb/users.db"
 
 
 class UsersDatabaseHelper(unittest.TestCase):
@@ -20,12 +21,12 @@ class UsersDatabaseHelper(unittest.TestCase):
 
         def fake_context():
             def called():
-                raise NotImplemented
+                raise NotImplementedError
             return called
 
         logger = logging.getLogger()
         self.db = database.build_database(logger,
-                                          "rabble_schema.sql",
+                                          "/repo/build_out/database/rabble_schema.sql",
                                           USERS_DB_PATH)
         self.addCleanup(clean_database)
         self.posts = posts_servicer.PostsDatabaseServicer(self.db, logger)
@@ -47,14 +48,14 @@ class UsersDatabaseHelper(unittest.TestCase):
         )
         add_res = self.users.Users(req, self.ctx)
         self.assertNotEqual(add_res.result_type,
-                            database_pb2.UsersResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return add_res
 
     def all_users(self):
         req = database_pb2.AllUsersRequest()
         res = self.users.AllUsers(req, self.ctx)
         print(res.error)
-        self.assertNotEqual(res.result_type, database_pb2.UsersResponse.ERROR)
+        self.assertNotEqual(res.result_type, general_pb2.ResultType.ERROR)
         return res
 
 
@@ -63,7 +64,7 @@ class UsersDatabase(UsersDatabaseHelper):
     def test_all_users_when_no_users(self):
         res = self.all_users()
         want = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[]
         )
         self.assertEqual(want, res)

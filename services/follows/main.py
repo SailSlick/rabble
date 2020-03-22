@@ -8,8 +8,8 @@ from utils.connect import get_service_channel
 from utils.logger import get_logger
 from utils.users import UsersUtil
 from utils.recommenders import RecommendersUtil
-from servicer import FollowsServicer
-from util import Util
+from follows.servicer import FollowsServicer
+from follows.util import Util
 
 from services.proto import database_pb2_grpc
 from services.proto import follows_pb2_grpc

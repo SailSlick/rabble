@@ -1,9 +1,10 @@
 import sqlite3
 
-import util
+import database.util as util
 
 from services.proto import database_pb2
 from services.proto import database_pb2_grpc
+from services.proto import general_pb2
 from google.protobuf.timestamp_pb2 import Timestamp
 
 
@@ -63,7 +64,7 @@ class PostsDatabaseServicer:
                 if not self._db_tuple_to_entry(tup, resp.results.add()):
                     del resp.results[-1]
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -84,7 +85,7 @@ class PostsDatabaseServicer:
                 if not self._db_tuple_to_entry(tup, resp.results.add()):
                     del resp.results[-1]
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -105,7 +106,7 @@ class PostsDatabaseServicer:
                     self._logger.warning(
                         CONVERT_ERROR
                         + "Wrong number of elements " + str(tup))
-                    resp.result_type = database_pb2.PostsResponse.ERROR
+                    resp.result_type = general_pb2.ResultType.ERROR
                     resp.error = str("Wrong number of elements")
                     break
                 try:
@@ -114,11 +115,11 @@ class PostsDatabaseServicer:
                     entry.tags = tup[2]
                 except Exception as e:
                     self._logger.warning(CONVERT_ERROR + str(e))
-                    resp.result_type = database_pb2.PostsResponse.ERROR
+                    resp.result_type = general_pb2.ResultType.ERROR
                     resp.error = str(e)
                     break
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -145,7 +146,7 @@ class PostsDatabaseServicer:
         except sqlite3.Error as e:
             self._logger.info("Error searching for posts")
             self._logger.error(str(e))
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -177,11 +178,11 @@ class PostsDatabaseServicer:
                 '  INSERT INTO posts_idx(rowid, title, body) ' +
                 'VALUES (new.global_id, new.title, new.body);\n' +
                 'END;')
-            resp.result_type = database_pb2.PostsResponse.OK
+            resp.result_type = general_pb2.ResultType.OK
         except sqlite3.Error as e:
             self._logger.info("Error creating posts index")
             self._logger.error(str(e))
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -208,16 +209,16 @@ class PostsDatabaseServicer:
                 'SELECT last_insert_rowid() FROM posts LIMIT 1')
         except sqlite3.Error as e:
             self._db.commit()
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
         if len(res) != 1 or len(res[0]) != 1:
             err = "Global ID data in weird format: " + str(res)
             self._logger.error(err)
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = err
             return
-        resp.result_type = database_pb2.PostsResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         resp.global_id = res[0][0]
 
     def _db_tuple_to_entry(self, tup, entry):
@@ -262,10 +263,10 @@ class PostsDatabaseServicer:
                     " ORDER BY p.global_id DESC",
                     *([user_id, user_id, user_id] + values))
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.PostsResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         for tup in res:
             if not self._db_tuple_to_entry(tup, resp.results.add()):
                 del resp.results[-1]
@@ -280,15 +281,15 @@ class PostsDatabaseServicer:
                     'DELETE FROM posts WHERE ' + filter_clause,
                     *values)
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.PostsResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
 
     def _handle_update(self, req, resp):
         # Only support updating with global_id or ap_id.
         if not req.match.global_id and not req.match.ap_id:
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "Must only filter by global_id or ap_id"
             return
         match_sql = ''
@@ -305,15 +306,15 @@ class PostsDatabaseServicer:
         try:
             self._db.execute(sql, *u_values, match_val)
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.PostsResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
 
     def SafeRemovePost(self, req, ctx):
         if not req.global_id and not req.ap_id:
             return database_pb2.PostsResponse(
-                result_type=database_pb2.PostsResponse.ERROR,
+                result_type=general_pb2.ResultType.ERROR,
                 error="Must delete by global_id or ap_id",
             )
         match_sql = ''
@@ -344,10 +345,9 @@ class PostsDatabaseServicer:
         except sqlite3.Error as e:
             self._db.discard_cursor()
             return database_pb2.PostsResponse(
-                result_type=database_pb2.PostsResponse.ERROR,
+                result_type=general_pb2.ResultType.ERROR,
                 error=str(e),
             )
         return database_pb2.PostsResponse(
-            result_type=database_pb2.PostsResponse.OK,
+            result_type=general_pb2.ResultType.OK,
         )
-

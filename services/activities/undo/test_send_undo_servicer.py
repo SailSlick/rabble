@@ -1,9 +1,11 @@
+import os
 import unittest
-from unittest.mock import Mock, patch
 
+from unittest.mock import Mock
 from send_undo_servicer import SendLikeUndoServicer
 from services.proto import database_pb2 as dbpb
 from services.proto import undo_pb2 as upb
+from services.proto import general_pb2
 from utils.activities import ActivitiesUtil
 from utils.users import UsersUtil
 
@@ -11,7 +13,7 @@ from utils.users import UsersUtil
 class MockDB:
     def __init__(self):
         self.posts_response = dbpb.PostsResponse(
-            result_type=dbpb.PostsResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[
                 dbpb.PostsEntry(
                     global_id=3,
@@ -23,7 +25,7 @@ class MockDB:
             ],
         )
         self.users_response = dbpb.UsersResponse(
-            result_type=dbpb.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[
                 dbpb.UsersEntry(
                     global_id=123,
@@ -43,6 +45,7 @@ class MockDB:
 
 class SendLikeUndoServicerTest(unittest.TestCase):
     def setUp(self):
+        os.environ["HOST_NAME"] = "cianisharrypotter.secret"
         self.req = upb.LikeUndoDetails(
             article_id=3,
             liker_handle="cian",
@@ -56,8 +59,10 @@ class SendLikeUndoServicerTest(unittest.TestCase):
         self.data = None
         self.url = None
         self.activ_util.send_activity = self.save_request
-        self.activ_util._get_activitypub_actor_url = lambda host, handle: (host + '/' + handle)
-        self.activ_util.build_inbox_url = lambda handle, host: (host + '/' + handle + '/inbox')
+        self.activ_util._get_activitypub_actor_url = lambda host, handle: (
+            host + '/' + handle)
+        self.activ_util.build_inbox_url = lambda handle, host: (
+            host + '/' + handle + '/inbox')
 
     def save_request(self, data, url):
         self.data = data
@@ -66,7 +71,7 @@ class SendLikeUndoServicerTest(unittest.TestCase):
 
     def test_foreign_request(self):
         resp = self.servicer.SendLikeUndoActivity(self.req, None)
-        self.assertEqual(resp.result_type, upb.UndoResponse.OK)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.OK)
         # Check the objects are correct
         self.assertEqual(self.data["type"], "Undo")
         self.assertEqual(self.data["object"]["type"], "Like")
@@ -80,7 +85,7 @@ class SendLikeUndoServicerTest(unittest.TestCase):
         self.db.posts_response.results[0].ClearField('ap_id')
         self.db.users_response.results[0].ClearField('host')
         resp = self.servicer.SendLikeUndoActivity(self.req, None)
-        self.assertEqual(resp.result_type, upb.UndoResponse.OK)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.OK)
         # Check the objects are correct
         self.assertEqual(self.data["type"], "Undo")
         self.assertEqual(self.data["object"]["type"], "Like")
@@ -92,14 +97,14 @@ class SendLikeUndoServicerTest(unittest.TestCase):
     def test_sending_error(self):
         self.activ_util.send_activity = lambda *_: (None, "Error 404")
         resp = self.servicer.SendLikeUndoActivity(self.req, None)
-        self.assertEqual(resp.result_type, upb.UndoResponse.ERROR)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.ERROR)
 
     def test_no_article(self):
         self.db.posts_response.ClearField('results')
         resp = self.servicer.SendLikeUndoActivity(self.req, None)
-        self.assertEqual(resp.result_type, upb.UndoResponse.ERROR)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.ERROR)
 
     def test_no_user(self):
         self.db.users_response.ClearField('results')
         resp = self.servicer.SendLikeUndoActivity(self.req, None)
-        self.assertEqual(resp.result_type, upb.UndoResponse.ERROR)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.ERROR)

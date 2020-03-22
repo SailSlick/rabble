@@ -1,6 +1,6 @@
 from activities.like import like_util
 from services.proto import database_pb2 as dbpb
-from services.proto import undo_pb2 as upb
+from services.proto import general_pb2
 
 
 class ReceiveLikeUndoServicer:
@@ -12,8 +12,8 @@ class ReceiveLikeUndoServicer:
         self._hostname = hostname if hostname else self._activ_util._hostname
 
     def gen_error(self, err):
-        return upb.UndoResponse(
-            result_type=upb.UndoResponse.ERROR,
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.ERROR,
             error=err,
         )
 
@@ -38,7 +38,7 @@ class ReceiveLikeUndoServicer:
             article_id=article_id,
         )
         resp = self._db.RemoveLike(req)
-        if resp.result_type != dbpb.DBLikeResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.error("Error from DB: %s", resp.error)
             return False
         return True
@@ -67,6 +67,6 @@ class ReceiveLikeUndoServicer:
             # Forward it to the followers
             self._activ_util.forward_activity_to_followers(
                 article.author_id, a)
-        return upb.UndoResponse(
-            result_type=upb.UndoResponse.OK,
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK,
         )

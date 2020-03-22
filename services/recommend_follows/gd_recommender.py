@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 
 class GraphDistanceRecommender:
@@ -32,7 +33,7 @@ class GraphDistanceRecommender:
 
     def _load_data(self):
         users_resp = self._db.AllUsers(database_pb2.AllUsersRequest())
-        if users_resp.result_type == database_pb2.UsersResponse.ERROR:
+        if users_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error('Could not get users from database: %s',
                                users_resp.error)
         return [(u.global_id, u.host_is_null) for u in users_resp.results]
@@ -52,7 +53,7 @@ class GraphDistanceRecommender:
             entry=follow
         )
         resp = self._db.Follow(req)
-        if resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error('Could not get follows from database: %s',
                                resp.error)
         return [(f.follower if inverse else f.followed) for f in resp.results]
@@ -65,7 +66,7 @@ class GraphDistanceRecommender:
 
     def graph_dist(self, u_id, v_id):
         '''The graph distance metric suggests if you are close on the
-        follow graph, then I should follow you. This means if I follow 
+        follow graph, then I should follow you. This means if I follow
         someone who follows you, the distance from me to you is 2, and I
         am likely to be interested in following you. If I follow someone
         who follows someone else who follows you, the distance is 3; etc.

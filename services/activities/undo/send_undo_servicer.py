@@ -1,6 +1,6 @@
 from activities.like import like_util
 from services.proto import database_pb2 as dbpb
-from services.proto import undo_pb2 as upb
+from services.proto import general_pb2
 
 
 class SendUndoException(Exception):
@@ -23,7 +23,7 @@ class SendLikeUndoServicer:
             ),
         )
         find_resp = self._db.Posts(posts_req)
-        if find_resp.result_type != dbpb.PostsResponse.OK:
+        if find_resp.result_type != general_pb2.ResultType.OK:
             raise SendUndoException(find_resp.error)
         elif len(find_resp.results) != 1:
             raise SendUndoException("Expecting 1 result, got {}".format(
@@ -39,8 +39,8 @@ class SendLikeUndoServicer:
         )
 
     def _build_error_response(self, err):
-        return upb.UndoResponse(
-            result_type=upb.UndoResponse.ERROR,
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.ERROR,
             error=err,
         )
 
@@ -64,8 +64,10 @@ class SendLikeUndoServicer:
             if err:
                 raise SendUndoException(err)
         except SendUndoException as e:
-            return upb.UndoResponse(
-                result_type=upb.UndoResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error=str(e)
             )
-        return upb.UndoResponse(result_type=upb.UndoResponse.OK)
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
+        )

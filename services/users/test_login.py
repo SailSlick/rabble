@@ -3,9 +3,10 @@ import bcrypt
 import unittest
 from unittest.mock import Mock
 
-from login import LoginHandler
+from users.login import LoginHandler
 from services.proto import database_pb2
 from services.proto import users_pb2
+from services.proto import general_pb2
 
 
 class MockDBStub:
@@ -41,36 +42,36 @@ class LoginHandlerTest(unittest.TestCase):
         req = self._make_request()
         err = "MockError"
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.ERROR,
+            result_type=general_pb2.ResultType.ERROR,
             error=err,
         )
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, users_pb2.LoginResponse.ERROR)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)
         self.assertEqual(resp.error, err)
 
     def test_handle_no_user(self):
         req = self._make_request()
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[],
         )
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, users_pb2.LoginResponse.ERROR)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)
 
     def test_handle_many_users(self):
         req = self._make_request()
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[self._make_user(), self._make_user()],
         )
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, users_pb2.LoginResponse.ERROR)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)
 
     def test_correct_password(self):
         req = self._make_request()
         user = self._make_user()
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[user],
         )
         resp = self.login_handler.Login(req, None)
@@ -81,21 +82,20 @@ class LoginHandlerTest(unittest.TestCase):
     def test_incorrect_password(self):
         req = self._make_request()
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[self._make_user(b"password123")],
         )
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, users_pb2.LoginResponse.DENIED)
+        self.assertEqual(resp.result, general_pb2.ResultType.DENIED)
 
     def test_blank_password(self):
         req = self._make_request()
         req.password = ""
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, users_pb2.LoginResponse.ERROR)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)
 
     def test_blank_username(self):
         req = self._make_request()
         req.handle = ""
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, users_pb2.LoginResponse.ERROR)
-
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)

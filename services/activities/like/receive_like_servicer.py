@@ -1,6 +1,7 @@
 from services.proto import database_pb2 as db_pb
 from services.proto import like_pb2
 from services.proto import recommend_posts_pb2
+from services.proto import general_pb2
 from like_util import build_like_activity
 
 
@@ -29,7 +30,7 @@ class ReceiveLikeServicer:
             article_id=article_id,
         )
         resp = self._db.AddLike(req)
-        if resp.result_type != db_pb.DBLikeResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             return resp.error
         return None
 
@@ -39,7 +40,7 @@ class ReceiveLikeServicer:
             article_id=article_id,
         )
         resp = self._post_recommendation_stub.UpdateModel(req)
-        if resp.result_type != recommend_posts_pb2.PostRecommendationsResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.error(
                 "UpdateModel for post recommendation failed: %s", resp.message)
 
@@ -51,24 +52,24 @@ class ReceiveLikeServicer:
         article, err = self._activ_util.get_article_by_ap_id(req.liked_object)
         if err is not None:
             self._logger.error("Error getting article: %s", err)
-            return like_pb2.LikeResponse(
-                result_type=like_pb2.LikeResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error=err,
             )
         # Get user.
         user_id = self._get_liking_user(req.liker_id)
         if user_id is None:
             self._logger.error("Could not get liking user")
-            return like_pb2.LikeResponse(
-                result_type=like_pb2.LikeResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Could not get liking user",
             )
         # Add like to local database.
         err = self._add_like_to_db(user_id, article.global_id)
         if err is not None:
             self._logger.error("Could not add like to DB: %s", err)
-            return like_pb2.LikeResponse(
-                result_type=like_pb2.LikeResponse.ERROR,
+            return general_pb2.GeneralResponse(
+                result_type=general_pb2.ResultType.ERROR,
                 error="Could not add like to DB: " + err
             )
         if self._user_util.user_is_local(article.author_id):
@@ -82,6 +83,6 @@ class ReceiveLikeServicer:
             if self._post_recommendation_stub is not None:
                 self._add_like_to_user_model(user_id, article.global_id)
 
-        return like_pb2.LikeResponse(
-            result_type=like_pb2.LikeResponse.OK
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
         )

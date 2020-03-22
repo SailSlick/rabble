@@ -2,21 +2,11 @@ syntax = "proto3";
 
 option go_package = "services/proto";
 
+import "services/proto/general.proto";
+
 message LikeUndoDetails {
   int64 article_id = 1;
   string liker_handle = 2;
-}
-
-message UndoResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
-
-  ResultType result_type = 1;
-
-  // Should only be set if result_type is not OK
-  string error = 2;
 }
 
 message ReceivedLikeUndoDetails {
@@ -30,7 +20,7 @@ message ReceivedLikeUndoDetails {
 
 // Service for sending and receiving server-to-server undo activities.
 service S2SUndo {
-  rpc ReceiveLikeUndoActivity(ReceivedLikeUndoDetails) returns (UndoResponse);
-  rpc SendLikeUndoActivity(LikeUndoDetails) returns (UndoResponse);
+  rpc ReceiveLikeUndoActivity(ReceivedLikeUndoDetails) returns (GeneralResponse);
+  rpc SendLikeUndoActivity(LikeUndoDetails) returns (GeneralResponse);
   // Further specialisations, i.e. SendArticleUndo, to be placed here.
 }

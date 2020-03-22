@@ -5,6 +5,7 @@ option go_package = "services/proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 import "services/proto/search.proto";
+import "services/proto/general.proto";
 
 /* LocalToAnyFollow represents either a local user following another local
  * user, or a local user following a foreign user. The fact that these
@@ -41,21 +42,6 @@ message LocalToRss {
     string feed_url = 2;
 }
 
-/* TODO(iandioch): Consider merging with DbFollowResponse in
- * services/database/database.proto */
-message FollowResponse {
-    enum ResultType {
-        OK = 0;
-        ERROR = 1;
-        // More types can be added here.
-    }
-
-    ResultType result_type = 1;
-
-    /* Should only be set if result_type is not OK. */
-    string error = 2;
-}
-
 message FollowUser {
     string handle = 1;
     string host = 2;
@@ -71,12 +57,6 @@ message GetFollowsRequest {
 }
 
 message GetFollowsResponse {
-    enum ResultType {
-        OK = 0;
-        ERROR = 1;
-        // More types can be added here.
-    }
-
     ResultType result_type = 1;
 
     /* Should only be set if result_type is not OK. */
@@ -102,15 +82,15 @@ message AcceptFollowRequest {
 }
 
 service Follows {
-  rpc SendFollowRequest(LocalToAnyFollow) returns (FollowResponse);
-  rpc RssFollowRequest(LocalToRss) returns (FollowResponse);
-  rpc ReceiveFollowRequest(ForeignToLocalFollow) returns (FollowResponse);
+  rpc SendFollowRequest(LocalToAnyFollow) returns (GeneralResponse);
+  rpc RssFollowRequest(LocalToRss) returns (GeneralResponse);
+  rpc ReceiveFollowRequest(ForeignToLocalFollow) returns (GeneralResponse);
   rpc GetFollowers(GetFollowsRequest) returns (GetFollowsResponse);
   rpc GetFollowing(GetFollowsRequest) returns (GetFollowsResponse);
   // Accept a follow in PENDING state
-  rpc AcceptFollow(AcceptFollowRequest) returns (FollowResponse);
+  rpc AcceptFollow(AcceptFollowRequest) returns (GeneralResponse);
   // Acknowledge a local user unfollowing any other user.
-  rpc SendUnfollow(LocalToAnyFollow) returns (FollowResponse);
+  rpc SendUnfollow(LocalToAnyFollow) returns (GeneralResponse);
   // Acknowledge a foreign user unfollowing a local user.
-  rpc ReceiveUnfollow(ForeignToLocalFollow) returns (FollowResponse);
+  rpc ReceiveUnfollow(ForeignToLocalFollow) returns (GeneralResponse);
 }

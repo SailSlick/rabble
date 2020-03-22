@@ -1,5 +1,6 @@
 from services.proto import database_pb2 as dbpb
 from services.proto import update_pb2 as upb
+from services.proto import general_pb2
 from utils.articles import md_to_html
 
 
@@ -25,10 +26,12 @@ class ReceiveUpdateServicer:
                 summary=req.summary,
             ),
         ))
-        if resp.result_type != dbpb.PostsResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             self._logger.error("Could not update article: %s", resp.error)
-            return upb.UpdateResponse(
+            return general_pb2.GeneralResponse(
                 result_type=upb.UpdateRespones.ERROR,
                 error="Error updating article in DB",
             )
-        return upb.UpdateResponse(result_type=upb.UpdateResponse.OK)
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
+        )

@@ -1,8 +1,5 @@
-import json
-
 from services.proto import follows_pb2
-from services.proto import follows_pb2_grpc
-from services.proto import s2s_follow_pb2
+from services.proto import general_pb2
 
 
 class ReceiveFollowServicer:
@@ -21,7 +18,7 @@ class ReceiveFollowServicer:
 
     def ReceiveFollowActivity(self, req, context):
         self._logger.debug('Received follow activity.')
-        resp = s2s_follow_pb2.FollowActivityResponse()
+        resp = general_pb2.GeneralResponse()
 
         follow = self._s2s_req_to_follows_req(req)
         self._logger.info('{}@{} requested to follow {}.'.format(
@@ -35,7 +32,7 @@ class ReceiveFollowServicer:
 
     def ReceiveUnfollowActivity(self, req, context):
         self._logger.debug('Received unfollow activity.')
-        resp = s2s_follow_pb2.FollowActivityResponse()
+        resp = general_pb2.GeneralResponse()
 
         follow = self._s2s_req_to_follows_req(req)
         self._logger.info('{}@{} requested to unfollow {}.'.format(

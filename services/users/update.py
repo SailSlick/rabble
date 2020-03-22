@@ -1,7 +1,8 @@
 from services.proto import users_pb2
 from services.proto import database_pb2
+from services.proto import general_pb2
 
-from util import get_user_and_check_pw
+from users.util import get_user_and_check_pw
 import bcrypt
 
 
@@ -21,14 +22,14 @@ class UpdateHandler:
                                               request.handle,
                                               request.current_password)
         except ValueError as e:
-                return users_pb2.UpdateUserResponse(
-                    result=users_pb2.UpdateUserResponse.ERROR,
-                    error=str(e),
-                )
+            return users_pb2.UpdateUserResponse(
+                result=general_pb2.ResultType.ERROR,
+                error=str(e),
+            )
 
         if err is not None:
             return users_pb2.UpdateUserResponse(
-                result=users_pb2.UpdateUserResponse.DENIED,
+                result=general_pb2.ResultType.DENIED,
             )
 
         pw = None
@@ -48,10 +49,10 @@ class UpdateHandler:
         )
 
         db_resp = self._db_stub.Users(update_request)
-        if db_resp.result_type != database_pb2.UsersResponse.OK:
+        if db_resp.result_type != general_pb2.ResultType.OK:
             self._logger.warning("Error update user: %s", db_resp.error)
             return users_pb2.CreateUserResponse(
-                result_type=users_pb2.CreateUserResponse.ERROR,
+                result_type=general_pb2.ResultType.ERROR,
                 error=db_resp.error,
             )
 

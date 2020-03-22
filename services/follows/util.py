@@ -1,7 +1,7 @@
-from services.proto import follows_pb2
 from services.proto import database_pb2
 from services.proto import s2s_follow_pb2
 from services.proto import approver_pb2
+from services.proto import general_pb2
 
 
 class Util:
@@ -26,7 +26,7 @@ class Util:
             entry=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error('Could not add follow to database: %s',
                                follow_resp.error)
         return follow_resp
@@ -43,7 +43,7 @@ class Util:
             match=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error('Could not delete follow from database: %s',
                                follow_resp.error)
         return follow_resp
@@ -61,7 +61,7 @@ class Util:
             match=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error('Could not add follow to database: %s',
                                follow_resp.error)
         return follow_resp
@@ -120,7 +120,7 @@ class Util:
                 'No host associated with foreign user {}'.format(from_handle)
             self._logger.error(error)
             self._logger.error('Aborting follow request')
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = error
             return None, None
 
@@ -129,7 +129,7 @@ class Util:
         if local_user is None:
             error = 'Could not find local user {}'.format(to_handle)
             self._logger.error(error)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = error
             return None, None
 
@@ -144,7 +144,7 @@ class Util:
         if foreign_user is None:
             error = 'Could not find user {}@{}'.format(from_handle, from_host)
             self._logger.error(error)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = error
             return local_user, None
         return local_user, foreign_user

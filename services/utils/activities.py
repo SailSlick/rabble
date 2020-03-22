@@ -4,6 +4,7 @@ import time
 import os
 
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 import requests
 
@@ -100,7 +101,7 @@ class ActivitiesUtil:
         user_resp = self._db.Users(database_pb2.UsersRequest(
             request_type=database_pb2.UsersRequest.FIND,
             match=database_pb2.UsersEntry(global_id=_id)))
-        if user_resp.result_type != database_pb2.UsersResponse.OK:
+        if user_resp.result_type != general_pb2.ResultType.OK:
             self._logger.warning(
                 'Could not find user: {}'.format(user_resp.error))
             return None
@@ -296,7 +297,7 @@ class ActivitiesUtil:
             ),
         )
         resp = self._db.Posts(posts_req)
-        if resp.result_type != database_pb2.PostsResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             return None, resp.error
         elif len(resp.results) > 1:
             return None, "Recieved too many results from DB"
@@ -321,7 +322,7 @@ class ActivitiesUtil:
             request_type=database_pb2.DbFollowRequest.FIND,
             match=database_pb2.Follow(followed=user_id),
         ))
-        if resp.result_type != database_pb2.DbFollowResponse.OK:
+        if resp.result_type != general_pb2.ResultType.OK:
             return resp.error
         self._logger.info("Have %d users to notify", len(resp.results))
         # Gather up the users, filter local and non-unique hosts.
@@ -330,7 +331,7 @@ class ActivitiesUtil:
             user_resp = self._db.Users(database_pb2.UsersRequest(
                 request_type=database_pb2.UsersRequest.FIND,
                 match=database_pb2.UsersEntry(global_id=follow.follower)))
-            if user_resp.result_type != database_pb2.UsersResponse.OK:
+            if user_resp.result_type != general_pb2.ResultType.OK:
                 self._logger.warning(
                     "Error finding user %d, skipping", follow.follower)
                 continue

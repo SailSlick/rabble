@@ -1,9 +1,10 @@
 import unittest
 from unittest.mock import Mock
 
-from create import CreateHandler
+from users.create import CreateHandler
 from services.proto import database_pb2
 from services.proto import users_pb2
+from services.proto import general_pb2
 
 
 class MockDBStub:
@@ -28,21 +29,21 @@ class CreateHandlerTest(unittest.TestCase):
         req = self._make_request("CianLR")
         err = "MockError"
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.ERROR,
+            result_type=general_pb2.ResultType.ERROR,
             error=err,
         )
         resp = self.create_handler.Create(req, None)
-        self.assertEqual(resp.result_type, users_pb2.CreateUserResponse.ERROR)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.ERROR)
         self.assertEqual(resp.error, err)
 
     def test_send_db_request(self):
         req = self._make_request("CianLR")
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             global_id=2
         )
         resp = self.create_handler.Create(req, None)
-        self.assertEqual(resp.result_type, users_pb2.CreateUserResponse.OK)
+        self.assertEqual(resp.result_type, general_pb2.ResultType.OK)
         self.assertEqual(resp.global_id, 2)
         self.assertNotEqual(self.db_stub.Users.call_args, None)
         db_req = self.db_stub.Users.call_args[0][0]

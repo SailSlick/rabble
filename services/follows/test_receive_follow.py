@@ -2,10 +2,11 @@ import unittest
 import os
 from unittest.mock import Mock
 
-from receive_follow import ReceiveFollowServicer
-from util import Util
+from follows.receive_follow import ReceiveFollowServicer
+from follows.util import Util
 from services.proto import follows_pb2
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 
 class FakeDatabase:
@@ -39,14 +40,14 @@ class FakeDatabase:
 
     def get_user(self, handle=None, host=None, host_is_null=False, bio=None):
         self.get_user_called_with = (handle, host, host_is_null, bio)
-        if handle == None:
+        if handle is None:
             return None
         return self.lookup_user((handle, host, host_is_null, bio))
 
     def get_or_create_user(self, handle=None, host=None, host_is_null=False, bio=None):
         # we should never be creating local users here, so we check that here.
         self.get_or_create_user_called_with = (handle, host, host_is_null, bio)
-        if handle == None or host == None:
+        if handle is None or host is None:
             return None
         user = (handle, host, host_is_null, bio)
         self.current_id += 1
@@ -66,16 +67,16 @@ class FakeDatabase:
         resp = database_pb2.DbFollowResponse()
         ids = set(self.users_dict.values())
         if foreign not in ids or local not in ids:
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             return resp
-        resp.result_type = database_pb2.DbFollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         return resp
 
     def Follow(self, follow_req):
         '''Stands in for database_stub.Follow'''
         self.follow_called_with = follow_req
         resp = database_pb2.DbFollowResponse()
-        resp.result_type = database_pb2.DbFollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         return resp
 
 
@@ -110,7 +111,7 @@ class ReceiveFollowTest(unittest.TestCase):
             followed='exists',
         )
         res = self.servicer.ReceiveFollowRequest(req, Mock())
-        self.assertEqual(res.result_type, follows_pb2.FollowResponse.OK)
+        self.assertEqual(res.result_type, general_pb2.ResultType.OK)
         self.assertIsNotNone(self.db.add_follow_called_with)
         self.db.reset()
 
@@ -121,7 +122,7 @@ class ReceiveFollowTest(unittest.TestCase):
             followed='bore_ragnarock',
         )
         res = self.servicer.ReceiveFollowRequest(req, Mock())
-        self.assertEqual(res.result_type, follows_pb2.FollowResponse.ERROR)
+        self.assertEqual(res.result_type, general_pb2.ResultType.ERROR)
         self.assertIn('bore_ragnarock', res.error)
         self.assertIsNone(self.db.add_follow_called_with)
         self.db.reset()
@@ -129,7 +130,7 @@ class ReceiveFollowTest(unittest.TestCase):
     def test_errors_when_empty_request(self):
         req = follows_pb2.ForeignToLocalFollow()
         res = self.servicer.ReceiveFollowRequest(req, Mock())
-        self.assertEqual(res.result_type, follows_pb2.FollowResponse.ERROR)
+        self.assertEqual(res.result_type, general_pb2.ResultType.ERROR)
         self.assertIsNone(self.db.add_follow_called_with)
         self.db.reset()
 
@@ -139,7 +140,7 @@ class ReceiveFollowTest(unittest.TestCase):
             followed='bore_ragnarock',
         )
         res = self.servicer.ReceiveFollowRequest(req, Mock())
-        self.assertEqual(res.result_type, follows_pb2.FollowResponse.ERROR)
+        self.assertEqual(res.result_type, general_pb2.ResultType.ERROR)
         self.assertIn('No host', res.error)
         self.assertIsNone(self.db.add_follow_called_with)
         self.db.reset()

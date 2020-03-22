@@ -45,10 +45,10 @@ type FollowsFake struct {
 	rrq *pb.LocalToRss
 }
 
-func (f *FollowsFake) RssFollowRequest(_ context.Context, r *pb.LocalToRss, _ ...grpc.CallOption) (*pb.FollowResponse, error) {
+func (f *FollowsFake) RssFollowRequest(_ context.Context, r *pb.LocalToRss, _ ...grpc.CallOption) (*pb.GeneralResponse, error) {
 	f.rrq = r
-	return &pb.FollowResponse{
-		ResultType: pb.FollowResponse_OK,
+	return &pb.GeneralResponse{
+		ResultType: pb.ResultType_OK,
 	}, nil
 }
 
@@ -62,7 +62,7 @@ type ArticleFake struct {
 func (a *ArticleFake) CreateNewArticle(_ context.Context, r *pb.NewArticle, _ ...grpc.CallOption) (*pb.NewArticleResponse, error) {
 	a.na = r
 	return &pb.NewArticleResponse{
-		ResultType: pb.NewArticleResponse_OK,
+		ResultType: pb.ResultType_OK,
 		GlobalId:   "test_id",
 	}, nil
 }
@@ -82,10 +82,10 @@ func (d *DatabaseFake) Posts(_ context.Context, r *pb.PostsRequest, _ ...grpc.Ca
 	}, nil
 }
 
-func (f *FollowsFake) SendFollowRequest(_ context.Context, r *pb.LocalToAnyFollow, _ ...grpc.CallOption) (*pb.FollowResponse, error) {
+func (f *FollowsFake) SendFollowRequest(_ context.Context, r *pb.LocalToAnyFollow, _ ...grpc.CallOption) (*pb.GeneralResponse, error) {
 	f.rq = r
-	return &pb.FollowResponse{
-		ResultType: pb.FollowResponse_OK,
+	return &pb.GeneralResponse{
+		ResultType: pb.ResultType_OK,
 	}, nil
 }
 
@@ -95,7 +95,7 @@ type LDNormFake struct {
 
 func (l *LDNormFake) Normalise(_ context.Context, r *pb.NormaliseRequest, _ ...grpc.CallOption) (*pb.NormaliseResponse, error) {
 	return &pb.NormaliseResponse{
-		ResultType: pb.NormaliseResponse_OK,
+		ResultType: pb.ResultType_OK,
 		Normalised: r.Json,
 	}, nil
 }
@@ -154,9 +154,9 @@ func TestHandleFollow(t *testing.T) {
 	if res.Code != http.StatusOK {
 		t.Errorf("Expected 200 OK, got %#v", res.Code)
 	}
-	var r pb.FollowResponse
+	var r pb.GeneralResponse
 	json.Unmarshal([]byte(res.Body.String()), &r)
-	if r.ResultType != pb.FollowResponse_OK {
+	if r.ResultType != pb.ResultType_OK {
 		t.Errorf("Expected FollowResponse_OK, got %#v", r.ResultType)
 	}
 }
@@ -173,9 +173,9 @@ func TestHandleFollowBadRequest(t *testing.T) {
 	if res.Code != http.StatusBadRequest {
 		t.Errorf("Expected 400 Bad Request, got %#v", res.Code)
 	}
-	var r pb.FollowResponse
+	var r pb.GeneralResponse
 	json.Unmarshal([]byte(res.Body.String()), &r)
-	if r.ResultType != pb.FollowResponse_ERROR {
+	if r.ResultType != pb.ResultType_ERROR {
 		t.Errorf("Expected FollowResponse_ERROR, got %#v", r.ResultType)
 	}
 }
@@ -191,9 +191,9 @@ func TestHandleFollowNotLoggedIn(t *testing.T) {
 	if res.Code != http.StatusForbidden {
 		t.Errorf("Expected 403 Forbidden, got %#v", res.Code)
 	}
-	var r pb.FollowResponse
+	var r pb.GeneralResponse
 	json.Unmarshal([]byte(res.Body.String()), &r)
-	if r.ResultType != pb.FollowResponse_ERROR {
+	if r.ResultType != pb.ResultType_ERROR {
 		t.Errorf("Expected FollowResponse_ERROR, got %#v", r.ResultType)
 	}
 }
@@ -211,9 +211,9 @@ func TestHandleRssFollow(t *testing.T) {
 	if res.Code != http.StatusOK {
 		t.Errorf("Expected 200 OK, got %#v", res.Code)
 	}
-	var r pb.FollowResponse
+	var r pb.GeneralResponse
 	json.Unmarshal([]byte(res.Body.String()), &r)
-	if r.ResultType != pb.FollowResponse_OK {
+	if r.ResultType != pb.ResultType_OK {
 		t.Errorf("Expected FollowResponse_OK, got %#v", r.ResultType)
 	}
 }
@@ -231,9 +231,9 @@ func TestHandleRssFollowBadRequest(t *testing.T) {
 	if res.Code != http.StatusBadRequest {
 		t.Errorf("Expected 400 Bad Request, got %#v", res.Code)
 	}
-	var r pb.FollowResponse
+	var r pb.GeneralResponse
 	json.Unmarshal([]byte(res.Body.String()), &r)
-	if r.ResultType != pb.FollowResponse_ERROR {
+	if r.ResultType != pb.ResultType_ERROR {
 		t.Errorf("Expected FollowResponse_ERROR, got %#v", r.ResultType)
 	}
 }
@@ -250,9 +250,9 @@ func TestHandleRssFollowNotLoggedIn(t *testing.T) {
 	if res.Code != http.StatusForbidden {
 		t.Errorf("Expected 403 Forbidden, got %#v", res.Code)
 	}
-	var r pb.FollowResponse
+	var r pb.GeneralResponse
 	json.Unmarshal([]byte(res.Body.String()), &r)
-	if r.ResultType != pb.FollowResponse_ERROR {
+	if r.ResultType != pb.ResultType_ERROR {
 		t.Errorf("Expected FollowResponse_ERROR, got %#v", r.ResultType)
 	}
 }

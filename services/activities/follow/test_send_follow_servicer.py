@@ -1,17 +1,22 @@
+import os
 import unittest
 from unittest.mock import Mock, patch
 
 from send_follow_servicer import SendFollowServicer
 from services.proto import s2s_follow_pb2
+from services.proto import general_pb2
 from utils.activities import ActivitiesUtil
 
 
 class SendFollowServicerTest(unittest.TestCase):
 
     def setUp(self):
+        os.environ["HOST_NAME"] = "cianisharrypotter.secret"
         self.activ_util = ActivitiesUtil(Mock(), Mock())
-        self.activ_util._get_activitypub_actor_url = lambda host, handle: (host + '/ap/@' + handle)
-        self.activ_util.build_inbox_url = lambda handle, host: (host + '/ap/@' + handle + '/inbox')
+        self.activ_util._get_activitypub_actor_url = lambda host, handle: (
+            host + '/ap/@' + handle)
+        self.activ_util.build_inbox_url = lambda handle, host: (
+            host + '/ap/@' + handle + '/inbox')
         self.servicer = SendFollowServicer(Mock(), self.activ_util, Mock())
         self.mock_response = Mock()
         self.mock_response.text = ''
@@ -36,7 +41,7 @@ class SendFollowServicerTest(unittest.TestCase):
             req.followed.handle = 'b'
             resp = self.servicer.SendFollowActivity(req, None)
             self.assertEqual(resp.result_type,
-                             s2s_follow_pb2.FollowActivityResponse.OK)
+                             general_pb2.ResultType.OK)
             self.assertEqual(resp.error, '')
             expected = self.servicer._build_activity('https://follower.com/ap/@a',
                                                      'https://followed.com/ap/@b')
@@ -56,7 +61,7 @@ class SendFollowServicerTest(unittest.TestCase):
             req.followed.handle = 'b'
             resp = self.servicer.SendFollowActivity(req, None)
             self.assertEqual(resp.result_type,
-                             s2s_follow_pb2.FollowActivityResponse.ERROR)
+                             general_pb2.ResultType.ERROR)
             expected = self.servicer._build_activity('https://follower.com/ap/@a',
                                                      'https://followed.com/ap/@b')
             mock_send.assert_called_once_with(expected,
@@ -73,7 +78,7 @@ class SendFollowServicerTest(unittest.TestCase):
             req.followed.handle = 'b'
             resp = self.servicer.SendFollowActivity(req, None)
             self.assertEqual(resp.result_type,
-                             s2s_follow_pb2.FollowActivityResponse.ERROR)
+                             general_pb2.ResultType.ERROR)
             self.assertEqual(resp.error, 'insert error here')
             expected = self.servicer._build_activity('https://follower.com/ap/@a',
                                                      'https://followed.com/ap/@b')

@@ -11,7 +11,7 @@ from utils.activities import ActivitiesUtil
 from utils.connect import get_service_channel
 from utils.logger import get_logger
 from utils.users import UsersUtil
-from servicer import ApproverServicer
+from activities.approver.servicer import ApproverServicer
 from services.proto import database_pb2_grpc
 from services.proto import approver_pb2_grpc
 

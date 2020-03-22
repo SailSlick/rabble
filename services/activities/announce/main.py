@@ -3,8 +3,6 @@ from concurrent import futures
 import argparse
 import grpc
 import time
-import os
-import sys
 
 from services.proto import database_pb2_grpc
 from services.proto import announce_pb2_grpc
@@ -14,7 +12,7 @@ from utils.connect import get_service_channel
 from utils.logger import get_logger
 from utils.users import UsersUtil
 
-from servicer import AnnounceServicer
+from activities.announce.servicer import AnnounceServicer
 
 
 def get_args():

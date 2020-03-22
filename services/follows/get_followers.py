@@ -1,7 +1,7 @@
 from enum import Enum
 
-from services.proto import database_pb2
 from services.proto import follows_pb2
+from services.proto import general_pb2
 
 
 class GetFollowsReceiver:
@@ -40,7 +40,7 @@ class GetFollowsReceiver:
         handle, host = self._users_util.parse_username(
             request.username)
         if handle is None and host is None:
-            resp.result_type = follows_pb2.GetFollowsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = 'Could not parse queried username'
             return resp
 
@@ -51,7 +51,7 @@ class GetFollowsReceiver:
             error = 'Could not find or create user {}@{}'.format(from_handle,
                                                                  from_instance)
             self._logger.error(error)
-            resp.result_type = follows_pb2.GetFollowersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = error
             return resp
         user_id = user_entry.global_id
@@ -91,7 +91,7 @@ class GetFollowsReceiver:
                 self._logger.warning('Could not convert user %s@%s to ' +
                                      'FollowUser', user.handle, user.host)
 
-        resp.result_type = follows_pb2.GetFollowsResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         return resp
 
     def GetFollowing(self, request, context):

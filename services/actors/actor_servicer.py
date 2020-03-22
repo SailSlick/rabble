@@ -1,5 +1,6 @@
 from services.proto import actors_pb2
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 
 class ActorsServicer:
@@ -24,7 +25,7 @@ class ActorsServicer:
             request_type=database_pb2.UsersRequest.FIND
         )
         resp = self._db_stub.Users(req)
-        if (resp.result_type != database_pb2.UsersResponse.OK or
+        if (resp.result_type != general_pb2.ResultType.OK or
                 len(resp.results) == 0):
             self._logger.error('No user found in database')
             return None

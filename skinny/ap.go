@@ -16,6 +16,26 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func (s *serverWrapper) errorCheckGeneralResponse(w http.ResponseWriter, resp *pb.GeneralResponse, err error, logStr string, custStr string) error {
+	if resp.ResultType == pb.ResultType_ERROR {
+		log.Printf(logStr, resp.Error)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, custStr)
+		return fmt.Errorf(resp.Error)
+	} else if resp.ResultType == pb.ResultType_ERROR_400 {
+		log.Printf(logStr, resp.Error)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, custStr)
+		return fmt.Errorf(resp.Error)
+	} else if err != nil {
+		log.Printf(logStr, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, custStr)
+		return err
+	}
+	return nil
+}
+
 type activity struct {
 	Type string `json:"type"`
 }
@@ -459,13 +479,12 @@ func (s *serverWrapper) handleCreateActivity() http.HandlerFunc {
 		defer cancel()
 
 		resp, err := s.create.ReceiveCreate(ctx, nfa)
-		if err != nil || resp.ResultType == pb.CreateResponse_ERROR {
-			log.Printf("Could not receive create activity. Error: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Issue with receiving create activity\n")
+		logStr := "Could not receive create activity. Error: %v"
+		custStr := "Issue with receiving create activity\n"
+		err = s.errorCheckGeneralResponse(w, resp, err, logStr, custStr)
+		if err != nil {
 			return
 		}
-
 		log.Printf("Activity was alright :+1:Received: %v\n", resp.Error)
 		fmt.Fprintf(w, "Created blog with title\n")
 	}
@@ -512,7 +531,7 @@ func (s *serverWrapper) handleUpdateActivity() http.HandlerFunc {
 		defer cancel()
 
 		resp, err := s.s2sUpdate.ReceiveUpdateActivity(ctx, ud)
-		if err != nil || resp.ResultType == pb.UpdateResponse_ERROR {
+		if err != nil || resp.ResultType == pb.ResultType_ERROR {
 			if err != nil {
 				log.Printf("Could not receive update activity. Error: %v", err)
 			} else {
@@ -566,7 +585,7 @@ func (s *serverWrapper) handleFollowActivity() http.HandlerFunc {
 
 		resp, err := s.s2sFollow.ReceiveFollowActivity(ctx, f)
 		if err != nil ||
-			resp.ResultType == pb.FollowActivityResponse_ERROR {
+			resp.ResultType == pb.ResultType_ERROR {
 			log.Printf("Could not receive follow activity. Error: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -604,7 +623,7 @@ func (s *serverWrapper) handleFollowUndoActivity() http.HandlerFunc {
 		defer cancel()
 
 		resp, err := s.s2sFollow.ReceiveUnfollowActivity(ctx, f)
-		if err != nil || resp.ResultType == pb.FollowActivityResponse_ERROR {
+		if err != nil || resp.ResultType == pb.ResultType_ERROR {
 			log.Printf("Could not receive undo follow activity. Error: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Issue with receiving undo follow activity.\n")
@@ -662,7 +681,7 @@ func (s *serverWrapper) handleLikeActivity() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Issue with receiving like activity.\n")
 			return
-		} else if resp.ResultType == pb.LikeResponse_ERROR {
+		} else if resp.ResultType == pb.ResultType_ERROR {
 			log.Printf("Could not receive like activity. Error: %v",
 				resp.Error)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -715,13 +734,19 @@ func (s *serverWrapper) handleDeleteActivity() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Issue with receiving delete activity.\n")
 			return
-		} else if resp.ResultType == pb.DeleteResponse_ERROR {
+		} else if resp.ResultType == pb.ResultType_ERROR {
 			log.Printf("Could not receive delete activity. Error: %v",
 				resp.Error)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Issue with receiving delete activity.\n")
 			return
-		} else if resp.ResultType == pb.DeleteResponse_DENIED {
+		} else if resp.ResultType == pb.ResultType_ERROR_400 {
+			log.Printf("Could not receive delete activity. Error: %v",
+				resp.Error)
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Issue with receiving delete activity.\n")
+			return
+		} else if resp.ResultType == pb.ResultType_DENIED {
 			log.Printf("Delete activity is denied")
 			w.WriteHeader(http.StatusUnauthorized)
 			fmt.Fprintf(w, "Delete activity is denied")
@@ -796,14 +821,10 @@ func (s *serverWrapper) handleApprovalActivity() http.HandlerFunc {
 		defer cancel()
 
 		resp, err := s.approver.ReceiveApproval(ctx, ap)
+		logStr := "Could not receive " + t.Type + " activity. Error: %v"
+		custStr := "Issue with receiving " + t.Type + " activity.\n"
+		err = s.errorCheckGeneralResponse(w, resp, err, logStr, custStr)
 		if err != nil {
-			log.Printf(receiveErr, t.Type, err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Error handling %s activity.\n", t.Type)
-		} else if resp.ResultType == pb.ApprovalResponse_ERROR {
-			log.Printf(receiveErr, t.Type, resp.Error)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Error handling %s activity.\n", t.Type)
 			return
 		}
 		log.Println("Activity received successfully.")
@@ -901,7 +922,7 @@ func (s *serverWrapper) handleLikeUndoActivity() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Issue with receiving like undo activity.\n")
 			return
-		} else if resp.ResultType == pb.UndoResponse_ERROR {
+		} else if resp.ResultType == pb.ResultType_ERROR {
 			log.Printf("Could not receive like undo activity. Error: %v",
 				resp.Error)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -985,16 +1006,10 @@ func (s *serverWrapper) handleAnnounceActivity() http.HandlerFunc {
 		defer cancel()
 
 		resp, err := s.announce.ReceiveAnnounceActivity(ctx, f)
+		logStr := "Could not receive announce activity. Error: %v"
+		custStr := "Issue with receiving announce activity.\n"
+		err = s.errorCheckGeneralResponse(w, resp, err, logStr, custStr)
 		if err != nil {
-			log.Printf("Could not receive announce activity. Error: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Issue with receiving announce activity.\n")
-			return
-		} else if resp.ResultType == pb.AnnounceResponse_ERROR {
-			log.Printf("Could not receive announce activity. Error: %v",
-				resp.Error)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Issue with receiving announce activity.\n")
 			return
 		}
 

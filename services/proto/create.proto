@@ -3,6 +3,7 @@ syntax = "proto3";
 option go_package = "services/proto";
 
 import "google/protobuf/timestamp.proto";
+import "services/proto/general.proto";
 
 // ArticleDetails holds content from a c2s request with timestamp
 // converted to protobuf format.
@@ -29,19 +30,7 @@ message NewForeignArticle {
   string summary = 8;
 }
 
-message CreateResponse {
-    enum ResultType {
-        OK = 0;
-        ERROR = 1;
-    }
-
-    ResultType result_type = 1;
-
-    /* Should only be set if result_type is not OK. */
-    string error = 2;
-}
-
 service Create {
-  rpc SendCreate(ArticleDetails) returns (CreateResponse);
-  rpc ReceiveCreate(NewForeignArticle) returns (CreateResponse);
+  rpc SendCreate(ArticleDetails) returns (GeneralResponse);
+  rpc ReceiveCreate(NewForeignArticle) returns (GeneralResponse);
 }

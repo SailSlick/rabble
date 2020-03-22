@@ -1,5 +1,6 @@
 from utils.activities import ActivitiesUtil
 
+
 def build_like_activity(like_actor, liked_object):
     return {
         "@context":  ActivitiesUtil.rabble_context(),
@@ -10,4 +11,3 @@ def build_like_activity(like_actor, liked_object):
             'id': like_actor,
         },
     }
-

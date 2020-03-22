@@ -2,9 +2,9 @@ import os
 import sys
 
 from services.proto import database_pb2
-from services.proto import follows_pb2
 from services.proto import s2s_follow_pb2
 from services.proto import recommend_follows_pb2
+from services.proto import general_pb2
 
 
 class SendUnfollowServicer:
@@ -36,14 +36,14 @@ class SendUnfollowServicer:
         )
 
         follow_resp = self._database_stub.Follow(req)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error('Error setting unfollow: %s', follow_resp.error)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = 'Could not add requested unfollow to database'
             return resp.error
 
     def SendUnfollow(self, request, context):
-        resp = follows_pb2.FollowResponse()
+        resp = general_pb2.GeneralResponse()
         self._logger.info('Setting unfollow.')
 
         from_handle, from_instance = self._users_util.parse_username(
@@ -56,7 +56,7 @@ class SendUnfollowServicer:
                           to_handle,
                           to_instance)
         if to_instance is None and to_handle is None:
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = 'Could not parse unfollowed username'
             return resp
 
@@ -68,7 +68,7 @@ class SendUnfollowServicer:
             error = 'Could not find or create user {}@{}'.format(from_handle,
                                                                  from_instance)
             self._logger.error(error)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = error
             return resp
         followed_entry = self._users_util.get_or_create_user_from_db(
@@ -78,7 +78,7 @@ class SendUnfollowServicer:
             error = 'Could not find or create user {}@{}'.format(to_handle,
                                                                  to_instance)
             self._logger.error(error)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = error
             return resp
         self._logger.info('User ID %d has requested to unfollow User ID %d',
@@ -110,5 +110,5 @@ class SendUnfollowServicer:
                 following=False)
             self._recommender_stub.UpdateFollowRecommendations(req)
 
-        resp.result_type = follows_pb2.FollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         return resp

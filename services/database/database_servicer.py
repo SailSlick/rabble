@@ -1,10 +1,10 @@
-from follow_servicer import FollowDatabaseServicer
-from posts_servicer import PostsDatabaseServicer
-from users_servicer import UsersDatabaseServicer
-from like_servicer import LikeDatabaseServicer
-from view_servicer import ViewDatabaseServicer
-from log_servicer import LogDatabaseServicer
-from share_servicer import ShareDatabaseServicer
+from database.follow_servicer import FollowDatabaseServicer
+from database.posts_servicer import PostsDatabaseServicer
+from database.users_servicer import UsersDatabaseServicer
+from database.like_servicer import LikeDatabaseServicer
+from database.view_servicer import ViewDatabaseServicer
+from database.log_servicer import LogDatabaseServicer
+from database.share_servicer import ShareDatabaseServicer
 
 from services.proto import database_pb2_grpc
 

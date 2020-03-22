@@ -1,10 +1,11 @@
-from surprise_recommender import SurpriseRecommender
-from cn_recommender import CNRecommender
-from gd_recommender import GraphDistanceRecommender
+from recommend_follows.surprise_recommender import SurpriseRecommender
+from recommend_follows.cn_recommender import CNRecommender
+from recommend_follows.gd_recommender import GraphDistanceRecommender
 
 from services.proto import follows_pb2_grpc
 from services.proto import database_pb2
 from services.proto import recommend_follows_pb2
+from services.proto import general_pb2
 from utils.recommenders import RecommendersUtil
 
 
@@ -48,18 +49,17 @@ class FollowRecommendationsServicer(follows_pb2_grpc.FollowsServicer):
         user = self._users_util.get_user_from_db(global_id=request.user_id)
         if user is None:
             resp.result_type = \
-                recommend_follows_pb2.FollowRecommendationResponse.ERROR
+                general_pb2.ResultType.ERROR
             resp.error = "Could not find the given user_id."
             return resp
 
         if not (user.host is None or user.host == ""):
             resp.result_type = \
-                recommend_follows_pb2.FollowRecommendationResponse.ERROR
+                general_pb2.ResultType.ERROR
             resp.error = "Can only give recommendations for local users."
             return resp
 
-        resp.result_type = \
-            recommend_follows_pb2.FollowRecommendationResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
 
         # Get the recommendations and package them into proto.
         for p in self._get_recommendations(user.global_id):

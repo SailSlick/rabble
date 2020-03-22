@@ -3,9 +3,10 @@ import bcrypt
 import unittest
 from unittest.mock import Mock
 
-from update import UpdateHandler
+from users.update import UpdateHandler
 from services.proto import database_pb2
 from services.proto import users_pb2
+from services.proto import general_pb2
 
 
 class MockDBStub:
@@ -41,39 +42,39 @@ class UpdateHandlerTest(unittest.TestCase):
         req = self._make_request()
         err = "MockError"
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.ERROR,
+            result_type=general_pb2.ResultType.ERROR,
             error=err,
         )
         resp = self.update_handler.Update(req, None)
-        self.assertEqual(resp.result, users_pb2.UpdateUserResponse.ERROR)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)
         self.assertEqual(resp.error, err)
 
     def test_handle_no_user(self):
         req = self._make_request()
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[],
         )
         resp = self.update_handler.Update(req, None)
-        self.assertEqual(resp.result, users_pb2.UpdateUserResponse.ERROR)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)
 
     def test_handle_many_users(self):
         req = self._make_request()
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[self._make_user(), self._make_user()],
         )
         resp = self.update_handler.Update(req, None)
-        self.assertEqual(resp.result, users_pb2.UpdateUserResponse.ERROR)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR)
 
     def test_correct_password(self):
         user = self._make_user()
         user_lookup = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[user],
         )
         user_update = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
         )
         self.db_stub.Users.side_effect = [user_lookup, user_update]
 
@@ -84,9 +85,8 @@ class UpdateHandlerTest(unittest.TestCase):
     def test_incorrect_password(self):
         req = self._make_request()
         self.db_stub.Users.return_value = database_pb2.UsersResponse(
-            result_type=database_pb2.UsersResponse.OK,
+            result_type=general_pb2.ResultType.OK,
             results=[self._make_user(b"password123")],
         )
         resp = self.update_handler.Update(req, None)
-        self.assertEqual(resp.result, users_pb2.UpdateUserResponse.DENIED)
-
+        self.assertEqual(resp.result, general_pb2.ResultType.DENIED)

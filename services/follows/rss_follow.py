@@ -3,8 +3,8 @@ import sys
 from urllib.parse import urlparse
 
 from services.proto import database_pb2
-from services.proto import follows_pb2
 from services.proto import rss_pb2
+from services.proto import general_pb2
 
 
 class RssFollowServicer:
@@ -39,25 +39,25 @@ class RssFollowServicer:
         rss_resp = self._rss_stub.NewRssFollow(rss_entry)
 
         # check response for new/rss service id
-        if (rss_resp.result_type == rss_pb2.NewRssFeedResponse.ERROR or
-                rss_resp.result_type == rss_pb2.NewRssFeedResponse.DENIED):
+        if (rss_resp.result_type == general_pb2.ResultType.ERROR or
+                rss_resp.result_type == general_pb2.ResultType.DENIED):
             self._logger.error("Rss service couldn't follow url: %s", feed_url)
             return None, rss_resp.message
         return rss_resp.global_id, None
 
     def RssFollowRequest(self, req, context):
-        resp = follows_pb2.FollowResponse()
+        resp = general_pb2.GeneralResponse()
         self._logger.info("Got follow rss request.")
 
         # check if url has right endings
         valid_url = self._validate_url(req.feed_url)
         if not valid_url:
             self._logger.error("Invalid rss/atom url: %s", req.feed_url)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "Invalid rss/atom url"
             return resp
 
-        # check if rss user already exists (handle: domain) (local user so no host)
+        # check if rss user already exists (handle: domain, local so no host)
         rss_handle = self._convert_rss_url_to_handle(req.feed_url)
         rss_entry = self._users_util.get_user_from_db(handle=rss_handle,
                                                       host_is_null=True)
@@ -65,7 +65,7 @@ class RssFollowServicer:
             # send to rss service to be created
             rss_user_id, rss_error = self._create_rss_user(req.feed_url)
             if rss_error:
-                resp.result_type = follows_pb2.FollowResponse.ERROR
+                resp.result_type = general_pb2.ResultType.ERROR
                 resp.error = rss_error
                 return resp
         else:
@@ -77,22 +77,22 @@ class RssFollowServicer:
         if follower_entry is None:
             error = "Could not find local user {}".format(req.follower)
             self._logger.error(error)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = error
             return resp
 
-        self._logger.info("User ID %d has requested to follow User ID %d",
+        self._logger.info("User ID %d has requested to follow RSS user ID %d",
                           follower_entry.global_id,
                           rss_user_id)
 
         # Add follower
         follow_resp = self._util.create_follow_in_db(follower_entry.global_id,
                                                      rss_user_id)
-        if follow_resp.result_type == database_pb2.DbFollowResponse.ERROR:
+        if follow_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error("Error creating follow: %s", follow_resp.error)
-            resp.result_type = follows_pb2.FollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "Could not add requested follow to database"
             return resp
 
-        resp.result_type = follows_pb2.FollowResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         return resp

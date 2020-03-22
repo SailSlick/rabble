@@ -3,6 +3,8 @@ import logging
 
 from services.proto import logger_pb2_grpc
 from services.proto import logger_pb2 as lpb2
+from services.proto import general_pb2
+
 
 class LoggerServicer(logger_pb2_grpc.LoggerServicer):
     def __init__(self, logger):
@@ -18,7 +20,7 @@ class LoggerServicer(logger_pb2_grpc.LoggerServicer):
     def _format_log(self, timestamp, source, level, message):
         return ' | '.join([
             datetime.utcfromtimestamp(timestamp.seconds)
-                .strftime('%Y-%m-%d %H:%M:%S'),
+            .strftime('%Y-%m-%d %H:%M:%S'),
             source,
             logging.getLevelName(level),
             message])
@@ -29,5 +31,6 @@ class LoggerServicer(logger_pb2_grpc.LoggerServicer):
             request.timestamp, request.source,
             py_level, request.message)
         self._logger.log(py_level, log_message)
-        return lpb2.WriteLogResponse(response_type=lpb2.WriteLogResponse.OK)
-
+        return general_pb2.GeneralResponse(
+            result_type=general_pb2.ResultType.OK
+        )

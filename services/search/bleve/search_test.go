@@ -216,7 +216,7 @@ func TestIndex(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to call Index(%v): %v", *i, err)
 		}
-		if res.ResultType != pb.IndexResponse_OK {
+		if res.ResultType != pb.ResultType_OK {
 			t.Fatalf("Failed to call Index(%v): %v", *i, res.Error)
 		}
 		currentId += 1

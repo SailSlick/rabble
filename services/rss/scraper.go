@@ -29,7 +29,7 @@ func (s *serverWrapper) getAllRssUsers(ctx context.Context) ([]*pb.UsersEntry, e
 	if findErr != nil {
 		return nil, fmt.Errorf(allRssUserErrorFmt, findErr)
 	}
-	if findResp.ResultType != pb.UsersResponse_OK {
+	if findResp.ResultType != pb.ResultType_OK {
 		return nil, fmt.Errorf(allRssUserErrorFmt, findResp.Error)
 	}
 	if len(findResp.Results) < 1 {

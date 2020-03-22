@@ -1,13 +1,13 @@
 import unittest
 import logging
 import os
-from functools import partial
 
-import follow_servicer
-import database
+import database.follow_servicer as follow_servicer
+import database.db as database
 from services.proto import database_pb2
+from services.proto import general_pb2
 
-FOLLOW_DB_PATH = "./testdb/follow.db"
+FOLLOW_DB_PATH = "/repo/build_out/database/testdb/follow.db"
 
 
 class FollowDatabaseHelper(unittest.TestCase):
@@ -23,7 +23,7 @@ class FollowDatabaseHelper(unittest.TestCase):
 
         logger = logging.getLogger()
         self.db = database.build_database(logger,
-                                          "rabble_schema.sql",
+                                          "/repo/build_out/database/rabble_schema.sql",
                                           FOLLOW_DB_PATH)
         self.addCleanup(clean_database)
         self.service = follow_servicer.FollowDatabaseServicer(self.db, logger)
@@ -43,7 +43,7 @@ class FollowDatabaseHelper(unittest.TestCase):
 
         add_res = self.service.Follow(req, self.ctx)
         self.assertNotEqual(add_res.result_type,
-                            database_pb2.DbFollowResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return add_res
 
     def find_follow(self, follower=None, followed=None, state=None):
@@ -60,7 +60,7 @@ class FollowDatabaseHelper(unittest.TestCase):
 
         find_res = self.service.Follow(req, self.ctx)
         self.assertNotEqual(find_res.result_type,
-                            database_pb2.DbFollowResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return find_res
 
     def update_follow(self, follower=None, followed=None, new_state=None):
@@ -79,7 +79,7 @@ class FollowDatabaseHelper(unittest.TestCase):
 
         find_res = self.service.Follow(req, self.ctx)
         self.assertNotEqual(find_res.result_type,
-                            database_pb2.DbFollowResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return find_res
 
     def delete_follow(self, follower=None, followed=None):
@@ -95,7 +95,7 @@ class FollowDatabaseHelper(unittest.TestCase):
 
         delete_res = self.service.Follow(req, self.ctx)
         self.assertNotEqual(delete_res.result_type,
-                            database_pb2.DbFollowResponse.ERROR)
+                            general_pb2.ResultType.ERROR)
         return delete_res
 
 
@@ -200,7 +200,7 @@ class TestUpdateDatabase(FollowDatabaseHelper):
         )
         follow_res = self.service.Follow(req, self.ctx)
         self.assertEqual(follow_res.result_type,
-                         database_pb2.DbFollowResponse.ERROR)
+                         general_pb2.ResultType.ERROR)
 
     def test_update_errors_when_match_is_not_set(self):
         entry = database_pb2.Follow(
@@ -215,7 +215,7 @@ class TestUpdateDatabase(FollowDatabaseHelper):
         )
         follow_res = self.service.Follow(req, self.ctx)
         self.assertEqual(follow_res.result_type,
-                         database_pb2.DbFollowResponse.ERROR)
+                         general_pb2.ResultType.ERROR)
 
     def test_update_errors_when_you_match_multiple_items(self):
         self.add_follow(follower=20,
@@ -234,7 +234,7 @@ class TestUpdateDatabase(FollowDatabaseHelper):
         )
         follow_res = self.service.Follow(req, self.ctx)
         self.assertEqual(follow_res.result_type,
-                         database_pb2.DbFollowResponse.ERROR)
+                         general_pb2.ResultType.ERROR)
 
 
 class FollowFindAllDatabase(FollowDatabaseHelper):
@@ -266,6 +266,7 @@ class FollowFindAllDatabase(FollowDatabaseHelper):
         self.assertNotIn(do_not_want[0], find_res.results)
         self.assertNotIn(do_not_want[1], find_res.results)
         self.assertEqual(len(find_res.results), 3)
+
 
 class TestDeleteDatabase(FollowDatabaseHelper):
 

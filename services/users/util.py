@@ -1,5 +1,7 @@
 import bcrypt
 from services.proto import database_pb2
+from services.proto import general_pb2
+
 
 def check_password(logger, pw, pw_hash):
     try:
@@ -9,7 +11,8 @@ def check_password(logger, pw, pw_hash):
         logger.warning(
             "Password hash in DB '%s' caused an error: %s",
             pw_hash, str(e))
-        return False # Invalid salt.
+        return False  # Invalid salt.
+
 
 def get_user_and_check_pw(logger, db_stub, handle, pw):
     """
@@ -41,7 +44,7 @@ def get_user_and_check_pw(logger, db_stub, handle, pw):
         ),
     )
     db_resp = db_stub.Users(find_request)
-    if db_resp.result_type != database_pb2.UsersResponse.OK:
+    if db_resp.result_type != general_pb2.ResultType.OK:
         err = "Error getting user from DB: " + db_resp.error
         logger.warning(err)
         raise ValueError(db_resp.error)

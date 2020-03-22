@@ -1,6 +1,5 @@
 from services.proto import article_pb2
-from services.proto import database_pb2
-from services.proto import mdc_pb2
+from services.proto import general_pb2
 from utils.articles import md_to_html
 
 
@@ -21,6 +20,6 @@ class PreviewServicer:
         )
         resp = article_pb2.PreviewResponse(
             preview=na,
-            result_type=article_pb2.NewArticleResponse.OK
+            result_type=general_pb2.ResultType.OK
         )
         return resp

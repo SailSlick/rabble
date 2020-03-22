@@ -1,8 +1,9 @@
 import sqlite3
 
-import util
+import database.util as util
 
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 DEFAULT_NUM_USERS = 50
 CONVERT_ERROR = "Error converting tuple to UsersEntry: "
@@ -80,7 +81,7 @@ class UsersDatabaseServicer:
                                         'WHERE handle = ? AND host is NULL',
                                         request.handle)
             if len(user_res) != 1 or len(user_res[0]) != 1:
-                resp.result_type = database_pb2.PendingFollowResponse.ERROR
+                resp.result_type = general_pb2.ResultType.ERROR
                 resp.error = 'couldnt get user response, users: ' + \
                     str(user_res)
                 return resp
@@ -92,13 +93,13 @@ class UsersDatabaseServicer:
                                    'ORDER BY users.global_id DESC',
                                    user_id, database_pb2.Follow.PENDING)
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.PendingFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
 
         for tup in res:
             if len(tup) != 2:
-                resp.result_type = database_pb2.PendingFollowResponse.ERROR
+                resp.result_type = general_pb2.ResultType.ERROR
                 resp.error = 'bad database resposne, got mis-sized tuple ' + \
                     str(tup)
                 return
@@ -125,7 +126,7 @@ class UsersDatabaseServicer:
         except sqlite3.Error as e:
             self._logger.info("Error searching for users")
             self._logger.error(str(e))
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -157,11 +158,11 @@ class UsersDatabaseServicer:
                 + '  INSERT INTO users_idx(rowid, handle) '
                 + 'VALUES (new.global_id, new.handle);\n'
                 + 'END;')
-            resp.result_type = database_pb2.PostsResponse.OK
+            resp.result_type = general_pb2.ResultType.OK
         except sqlite3.Error as e:
             self._logger.info("Error creating users index")
             self._logger.error(str(e))
-            resp.result_type = database_pb2.PostsResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
         return resp
@@ -176,10 +177,10 @@ class UsersDatabaseServicer:
         try:
             db_res = self._db.execute(self._select_base, 0)
         except sqlite3.Error as e:
-            response.result_type = database_pb2.UsersResponse.ERROR
+            response.result_type = general_pb2.ResultType.ERROR
             response.error = str(e)
             return response
-        response.result_type = database_pb2.UsersResponse.OK
+        response.result_type = general_pb2.ResultType.OK
         for tup in db_res:
             if not self._db_tuple_to_entry(tup, response.results.add()):
                 del response.results[-1]
@@ -196,16 +197,16 @@ class UsersDatabaseServicer:
                 "l.user_id = u.global_id GROUP BY u.global_id "
             )
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return resp
-        resp.result_type = database_pb2.UsersResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         for tup in db_res:
             entry = resp.results.add()
             if len(tup) != 3:
                 self._logger.warning(
                     CONVERT_ERROR + "Wrong number of elements " + str(tup))
-                resp.result_type = database_pb2.UsersResponse.ERROR
+                resp.result_type = general_pb2.ResultType.ERROR
                 resp.error = str("Wrong number of elements")
                 break
             try:
@@ -218,7 +219,7 @@ class UsersDatabaseServicer:
                     entry.likes = tup[2]
             except Exception as e:
                 self._logger.warning(CONVERT_ERROR + str(e))
-                resp.result_type = database_pb2.UsersResponse.ERROR
+                resp.result_type = general_pb2.ResultType.ERROR
                 resp.error = str(e)
                 break
         return resp
@@ -245,31 +246,31 @@ class UsersDatabaseServicer:
         except sqlite3.Error as e:
             self._logger.info("Error inserting")
             self._logger.error(str(e))
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
         if len(res) != 1 or len(res[0]) != 1:
             err = "Global ID data in weird format: " + str(res)
             self._logger.error(err)
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = err
             return
-        resp.result_type = database_pb2.UsersResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         resp.global_id = res[0][0]
 
     def _users_handle_delete(self, req, resp):
         if req.entry.global_id == 0:
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "Global ID is required for delete"
             return
         sql = "DELETE FROM users WHERE global_id = ?"
         try:
             self._db.execute(sql, req.entry.global_id)
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.UsersResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
 
     def _users_handle_update(self, req, resp):
         update_clause, u_values = util.entry_to_update(
@@ -282,7 +283,7 @@ class UsersDatabaseServicer:
             self._logger.info("Could not generate update SQL: "
                               "filter_clause: '%s', update_clause: '%s'",
                               filter_clause, update_clause)
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = "Bad input: could not generate SQL."
             return
 
@@ -293,17 +294,17 @@ class UsersDatabaseServicer:
         try:
             count = self._db.execute_count(sql, *values)
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
 
         if count != 1:
             err = 'UPDATE affected {} rows, expected 1'.format(count)
-            resp.result_type = database_pb2.DbFollowResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             self._logger.warning(err)
             resp.error = err
 
-        resp.result_type = database_pb2.UsersResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
 
     def _get_uid(self, req):
         user_id = -1
@@ -329,10 +330,10 @@ class UsersDatabaseServicer:
                 res = self._db.execute(self._select_base
                                        + 'WHERE ' + filter_clause, user_id, *values)
         except sqlite3.Error as e:
-            resp.result_type = database_pb2.UsersResponse.ERROR
+            resp.result_type = general_pb2.ResultType.ERROR
             resp.error = str(e)
             return
-        resp.result_type = database_pb2.UsersResponse.OK
+        resp.result_type = general_pb2.ResultType.OK
         for tup in res:
             if not self._db_tuple_to_entry(tup, resp.results.add()):
                 del resp.results[-1]

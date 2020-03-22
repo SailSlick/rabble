@@ -1,4 +1,4 @@
-from services.proto import announce_pb2
+from services.proto import general_pb2
 
 
 class AnnounceUtil:
@@ -29,6 +29,6 @@ class AnnounceUtil:
             inbox = self._activ_util.build_inbox_url(target.handle, host)
             resp, err = self._activ_util.send_activity(activity, inbox)
             if err is not None:
-                response.result_type = announce_pb2.AnnounceResponse.ERROR
+                response.result_type = general_pb2.ResultType.ERROR
                 response.error = err
         return response

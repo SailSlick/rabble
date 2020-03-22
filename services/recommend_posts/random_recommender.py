@@ -1,4 +1,5 @@
 from services.proto import database_pb2
+from services.proto import general_pb2
 
 
 class RandomRecommender:
@@ -16,7 +17,7 @@ class RandomRecommender:
             user_id=user_id
         )
         find_resp = self._db.RandomPosts(find_req)
-        if find_resp.result_type == database_pb2.PostsResponse.ERROR:
+        if find_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.info(
                 'Got error getting RandomPosts: {}'.format(find_resp.error))
             return [], find_resp.error

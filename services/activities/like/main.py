@@ -3,8 +3,6 @@ from concurrent import futures
 import argparse
 import grpc
 import time
-import os
-import sys
 
 from services.proto import database_pb2_grpc
 from services.proto import like_pb2_grpc

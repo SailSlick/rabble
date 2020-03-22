@@ -2,14 +2,12 @@
 from concurrent import futures
 import argparse
 import grpc
-import os
-import sys
 import time
 
 from utils.connect import get_service_channel
 from utils.logger import get_logger
 from utils.users import UsersUtil
-from servicer import FollowRecommendationsServicer
+from recommend_follows.servicer import FollowRecommendationsServicer
 
 from services.proto import database_pb2_grpc
 from services.proto import recommend_follows_pb2_grpc

@@ -3,6 +3,7 @@ from collections import defaultdict
 from heapq import heappush, heappushpop
 
 from services.proto import database_pb2
+from services.proto import general_pb2
 from utils.recommenders import RecommendersUtil
 from utils.articles import get_article
 
@@ -83,7 +84,7 @@ class CosineRecommender:
 
     def _get_all_posts_and_tags(self):
         find_resp = self._db.TaggedPosts(database_pb2.PostsRequest())
-        if find_resp.result_type == database_pb2.PostsResponse.ERROR:
+        if find_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 'Error getting TaggedPosts for Cosine: {}'.format(find_resp.error))
             return []
@@ -91,7 +92,7 @@ class CosineRecommender:
 
     def _get_all_user(self):
         find_resp = self._db.AllUserLikes(database_pb2.AllUsersRequest())
-        if find_resp.result_type == database_pb2.UsersResponse.ERROR:
+        if find_resp.result_type == general_pb2.ResultType.ERROR:
             self._logger.error(
                 'Error getting AllUserLikes for Cosine: {}'.format(find_resp.error))
             return []

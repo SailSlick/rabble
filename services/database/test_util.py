@@ -1,6 +1,6 @@
 import unittest
 
-import util
+import database.util as util
 from services.proto import database_pb2
 
 
@@ -51,8 +51,8 @@ class UtilTest(unittest.TestCase):
 
     def test_equivalent_filter_deferred(self):
         entry = database_pb2.PostsEntry(
-                title="Despacito",
-                body="alexa",
+            title="Despacito",
+            body="alexa",
         )
 
         d = {'body': lambda entry, comp: ("body" + comp, True)}
@@ -67,7 +67,7 @@ class UtilTest(unittest.TestCase):
 
     def test_equivalent_filter_deferred_default_unset(self):
         entry = database_pb2.PostsEntry(
-                title="Despacito",
+            title="Despacito",
         )
 
         d = {'body': lambda entry, comp: ("body" + comp, True)}
@@ -82,8 +82,8 @@ class UtilTest(unittest.TestCase):
 
     def test_equivalent_filter_deferred_default_set(self):
         entry = database_pb2.PostsEntry(
-                title="Despacito",
-                body="nice"
+            title="Despacito",
+            body="nice"
         )
 
         d = {'body': lambda entry, comp: ("body" + comp, True)}
@@ -100,8 +100,8 @@ class UtilTest(unittest.TestCase):
 
     def test_update_filter(self):
         entry = database_pb2.PostsEntry(
-                title="Megolavania",
-                body="sans is angry",
+            title="Megolavania",
+            body="sans is angry",
         )
         clause, vals = util.entry_to_update(entry)
         self.assertIn('title = ?', clause)
@@ -112,8 +112,8 @@ class UtilTest(unittest.TestCase):
 
     def test_update_filter_deferred_none_return(self):
         entry = database_pb2.PostsEntry(
-                title="Megolavania",
-                body="sans is angry",
+            title="Megolavania",
+            body="sans is angry",
         )
         d = {'body': lambda entry, comp: ("", util.DONT_USE_FIELD)}
         clause, vals = util.entry_to_update(entry, deferred=d)
@@ -123,8 +123,8 @@ class UtilTest(unittest.TestCase):
 
     def test_update_filter_deferred_value_set(self):
         entry = database_pb2.PostsEntry(
-                title="Megolavania",
-                body="sans is angry",
+            title="Megolavania",
+            body="sans is angry",
         )
         d = {'body': lambda entry, comp: ("body" + comp, True)}
         clause, vals = util.entry_to_update(entry, deferred=d)
@@ -136,7 +136,7 @@ class UtilTest(unittest.TestCase):
 
     def test_update_filter_deferred_unset(self):
         entry = database_pb2.PostsEntry(
-                title="Megolavania",
+            title="Megolavania",
         )
         d = {'body': lambda entry, comp: ("body" + comp, True)}
         clause, vals = util.entry_to_update(entry, deferred=d)

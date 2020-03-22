@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option go_package = "services/proto";
 
+import "services/proto/general.proto";
+
 // Both handle and host should be fully-qualified for both local and non-local
 // users, as they are required to build the URLs of actors, etc.
 message FollowActivityUser {
@@ -21,23 +23,11 @@ message ReceivedFollowDetails {
   string followed = 2;
 }
 
-message FollowActivityResponse {
-  enum ResultType {
-    OK = 0;
-    ERROR = 1;
-  }
-
-  ResultType result_type = 1;
-
-  /* Should only be set if result_type is not OK. */
-  string error = 2;
-}
-
 // Service for sending and receiving server-to-server follow requests.
 service S2SFollow {
-  rpc SendFollowActivity(FollowDetails) returns (FollowActivityResponse);
-  rpc ReceiveFollowActivity(ReceivedFollowDetails) returns (FollowActivityResponse);
+  rpc SendFollowActivity(FollowDetails) returns (GeneralResponse);
+  rpc ReceiveFollowActivity(ReceivedFollowDetails) returns (GeneralResponse);
 
-  rpc SendUnfollowActivity(FollowDetails) returns (FollowActivityResponse);
-  rpc ReceiveUnfollowActivity(ReceivedFollowDetails) returns (FollowActivityResponse);
+  rpc SendUnfollowActivity(FollowDetails) returns (GeneralResponse);
+  rpc ReceiveUnfollowActivity(ReceivedFollowDetails) returns (GeneralResponse);
 }
