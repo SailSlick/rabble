@@ -30,6 +30,7 @@ const (
 type clientResp struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`
+	ID      string `json:"id"`
 }
 
 func parseTimestamp(w http.ResponseWriter, published string, resp *clientResp) (*tspb.Timestamp, error) {
@@ -446,8 +447,10 @@ func (s *serverWrapper) handleCreateArticle() http.HandlerFunc {
 			return
 		}
 
-		log.Printf("User Id: %#v attempted to create a post with title: %v\n", globalID, t.Title)
+		log.Printf("User Id: %#v attempted to create a post with title: %v and Id: %v\n", globalID, t.Title, resp.GlobalId)
 		cResp.Message = "Article created"
+		cResp.ID = resp.GlobalId
+
 		enc.Encode(cResp)
 	}
 }

@@ -2,7 +2,15 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 // Based on code in typescript documentation, licensed under Apache License 2.0
 // See https://git.io/fxCgz for a link to the documentation.
-module.exports = {
+module.exports = env => {
+  reactPostfix = "development.js"
+  if (typeof(env) != "undefined" && env.production == true) {
+    reactPostfix = "production.min.js"
+  }
+
+  const reactUnpkg = "https://unpkg.com/react@16/umd/react." + reactPostfix;
+  const reactDomUnpkg = "https://unpkg.com/react-dom@16/umd/react-dom." + reactPostfix;
+  return {
     entry: "./src/index.tsx",
     output: {
         filename: "bundle.js",
@@ -57,11 +65,12 @@ module.exports = {
                 "https://fonts.googleapis.com/css?family=Lato",
             ],
             scripts: [
-                "https://unpkg.com/feather-icons@4.17.0/dist/feather.min.js",
-                "https://unpkg.com/react-tagsinput@3.9.0/react-tagsinput.js",
-                "https://unpkg.com/react@16/umd/react.development.js",
-                "https://unpkg.com/react-dom@16/umd/react-dom.development.js",
+                "https://unpkg.com/feather-icons@4/dist/feather.min.js",
+                "https://unpkg.com/react-tagsinput@3/react-tagsinput.js",
+                reactUnpkg,
+                reactDomUnpkg,
             ]
         })
     ]
+  }
 }

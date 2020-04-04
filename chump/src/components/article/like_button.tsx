@@ -1,10 +1,10 @@
 import * as React from "react";
 import { ThumbsDown, ThumbsUp } from "react-feather";
 
-import * as config from "../../rabble_config.json";
-import { SendLike } from "../models/like";
-import { IParsedPost } from "../models/posts";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { SendLike } from "../../models/like";
+import { IParsedPost } from "../../models/posts";
+import { RootComponent } from "../root_component";
 
 interface ILikeButtonProps {
   initiallyLiked: boolean;

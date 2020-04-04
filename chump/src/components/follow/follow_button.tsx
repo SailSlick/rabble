@@ -2,9 +2,9 @@ import * as React from "react";
 import { UserCheck, UserMinus, UserPlus } from "react-feather";
 import { Link } from "react-router-dom";
 import { Response } from "superagent";
-import * as config from "../../rabble_config.json";
-import { CreateFollow, Unfollow } from "../models/follow";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { CreateFollow, Unfollow } from "../../models/follow";
+import { RootComponent } from "../root_component";
 
 interface IFormState {
   following: boolean; // true if active user already follows the other user.

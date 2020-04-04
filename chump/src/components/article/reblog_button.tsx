@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Repeat } from "react-feather";
 
-import * as config from "../../rabble_config.json";
-import { IParsedPost } from "../models/posts";
-import { SendReblog } from "../models/reblog";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { IParsedPost } from "../../models/posts";
+import { SendReblog } from "../../models/reblog";
+import { RootComponent } from "../root_component";
 
 interface IReblogProps {
   username: string;

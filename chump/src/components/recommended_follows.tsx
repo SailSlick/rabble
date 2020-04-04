@@ -3,7 +3,7 @@ import { Link, RouteProps } from "react-router-dom";
 
 import { GetRecommendedFollows, IRecommendedFollowsResponse } from "../models/recommended_follows";
 import { IParsedUser } from "../models/user";
-import { User } from "./user";
+import { User } from "./account/user";
 
 interface IRecommendedFollowsProps extends RouteProps {
   username: string;

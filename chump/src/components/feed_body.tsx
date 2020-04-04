@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { IAnyParsedPost } from "../models/posts";
-import { Card } from "./card";
+import { Card } from "./article/card";
 import { RootComponent } from "./root_component";
 
 import * as config from "../../rabble_config.json";

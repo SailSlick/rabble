@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { FollowForm, IFormProps } from "./follow_form";
-import { RecommendedFollows } from "./recommended_follows";
+import { RecommendedFollows } from "../recommended_follows";
 
 export const Follow: React.StatelessComponent<IFormProps> = (props) => {
   return (

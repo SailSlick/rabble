@@ -1,8 +1,9 @@
 import * as React from "react";
 import {Redirect, RouteProps} from "react-router-dom";
-import * as config from "../../rabble_config.json";
-import {GetRegisterPromise, IRegisterResult} from "../models/register";
-import {RootComponent} from "./root_component";
+
+import * as config from "../../../rabble_config.json";
+import {GetRegisterPromise, IRegisterResult} from "../../models/register";
+import {RootComponent} from "../root_component";
 
 interface IRegisterProps extends RouteProps {
   loginCallback(username: string, userId: number): void;

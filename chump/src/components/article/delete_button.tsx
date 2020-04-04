@@ -3,10 +3,10 @@ import { Trash2 } from "react-feather";
 import * as RModal from "react-modal";
 import * as request from "superagent";
 
-import * as config from "../../rabble_config.json";
-import { DeleteArticle } from "../models/article";
-import { IParsedPost } from "../models/posts";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { DeleteArticle } from "../../models/article";
+import { IParsedPost } from "../../models/posts";
+import { RootComponent } from "../root_component";
 
 interface IDeleteProps {
   successCallback: () => void;

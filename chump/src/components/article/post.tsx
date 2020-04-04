@@ -1,16 +1,16 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 
-import * as config from "../../rabble_config.json";
-import { IParsedPost } from "../models/posts";
+import * as config from "../../../rabble_config.json";
+import { IParsedPost } from "../../models/posts";
 import { DeleteButton } from "./delete_button";
 import { EditButton } from "./edit_button";
-import { FollowButton} from "./follow_button";
+import { FollowButton} from "../follow/follow_button";
 import { LikeButton } from "./like_button";
 import { Reblog } from "./reblog_button";
-import { RootComponent } from "./root_component";
+import { RootComponent } from "../root_component";
 import { Tags } from "./tags";
-import { GenerateUserLinks, GetCustomCSS, RemoveProtocol } from "./util";
+import { GenerateUserLinks, GetCustomCSS, RemoveProtocol } from "../util";
 
 interface IPostProps {
   blogPost: IParsedPost;

@@ -5,7 +5,7 @@
   "main": "index.tsx",
   "scripts": {
     "build": "webpack --config webpack.config.js --mode development",
-    "build:prod": "webpack --config webpack.config.js -d --mode production",
+    "build:prod": "webpack --mode production --env.production --config webpack.config.js",
     "start": "webpack-dev-server --mode development --content-base ./dist --hot --inline --colors --port 3000 --open",
     "lint": "tslint src/**/*.tsx src/**/*.ts test/**/*.tsx test/**/*.ts",
     "fix": "tslint --fix src/**/*.tsx src/**/*.ts test/**/*.tsx test/**/*.ts || true",

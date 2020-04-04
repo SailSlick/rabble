@@ -1,11 +1,11 @@
 import * as React from "react";
 import { RouteProps } from "react-router-dom";
 
-import { GetSinglePost, IParsedPost } from "../models/posts";
-import { IParsedUser } from "../models/user";
+import { GetSinglePost, IParsedPost } from "../../models/posts";
+import { IParsedUser } from "../../models/user";
 import { Post } from "./post";
-import { RootComponent } from "./root_component";
-import { User } from "./user";
+import { RootComponent } from "../root_component";
+import { User } from "../account/user";
 
 interface ISinglePostState {
   posts: IParsedPost[];

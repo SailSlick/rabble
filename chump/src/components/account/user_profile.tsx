@@ -1,18 +1,17 @@
 import * as React from "react";
-
 import { RouteProps } from "react-router-dom";
-import * as config from "../../rabble_config.json";
-import { AccountEdit } from "./account_edit";
-import { Followers, Following } from "./follow_user_list";
-import { Pending } from "./pending";
-import { RootComponent } from "./root_component";
-import { User } from "./user";
-import { UserFeed } from "./user_feed";
 
+import * as config from "../../../rabble_config.json";
+import { AccountEdit } from "./account_edit";
+import { Followers, Following } from "../follow/follow_user_list";
+import { Pending } from "../follow/pending";
+import { RootComponent } from "../root_component";
+import { User } from "./user";
+import { UserFeed } from "../user_feed";
 import {
   EditUserProfilePicPromise, EditUserPromise, GetUserInfo,
   IEditUserResult, IParsedUser,
-} from "../models/user";
+} from "../../models/user";
 
 /*
  * The profile page is where somebody lands if they click on a specific user.

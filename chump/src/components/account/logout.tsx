@@ -2,9 +2,9 @@ import * as Promise from "bluebird";
 import * as React from "react";
 import {Redirect, RouteProps} from "react-router-dom";
 import * as superagent from "superagent";
-import { RootComponent } from "./root_component";
 
-import { GetLogoutPromise, ILogoutResult } from "../models/user";
+import { GetLogoutPromise, ILogoutResult } from "../../models/user";
+import { RootComponent } from "../root_component";
 
 interface ILogoutProps extends RouteProps {
   logoutCallback(): void;

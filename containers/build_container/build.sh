@@ -115,5 +115,11 @@ echo "Installing node.js dependencies"
 cd chump && npm install && cd ..
 
 echo "Building client"
-cd chump && npm run build && cd ..
+if [ -z "$TEST_ENV" ]; then
+  echo "TEST_ENV not set, building chump prod"
+  cd chump && npm run build:prod && cd ..
+else
+  cd chump && npm run build && cd ..
+fi
+
 mv chump/dist build_out/chump_dist

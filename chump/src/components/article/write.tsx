@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import * as config from "../../rabble_config.json";
-import { CreateArticle } from "../models/article";
+import * as config from "../../../rabble_config.json";
+import { CreateArticle } from "../../models/article";
 import { CreateArticleForm } from "./create_article_form";
 
 interface IWriteProps {

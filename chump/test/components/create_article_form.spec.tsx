@@ -1,13 +1,14 @@
 import * as bluebird from "bluebird";
 import { expect } from "chai";
 import * as React from "react";
+import { MemoryRouter } from "react-router";
 import * as sinon from "sinon";
 import * as request from "superagent";
 
-import { CreateArticleForm } from "../../src/components/create_article_form";
+import { CreateArticleForm } from "../../src/components/article/create_article_form";
 import * as article from "../../src/models/article";
 import { PartialResponse} from "../../src/models/common";
-import { mount } from "./enzyme";
+import { mount, shallow } from "./enzyme";
 
 const sandbox: sinon.SinonSandbox = sinon.createSandbox();
 const now: Date = new Date();
@@ -51,12 +52,16 @@ describe("CreateArticleForm", () => {
   });
 
   it("can mount", (done) => {
-    testComponent = mount(<CreateArticleForm {...exampleProps}/>);
+    testComponent = mount(
+      <MemoryRouter>
+        <CreateArticleForm {...exampleProps}/>
+      </MemoryRouter>,
+    );
     done();
   });
 
   it("can handle title input", (done) => {
-    testComponent = mount(<CreateArticleForm {...exampleProps}/>);
+    testComponent = shallow(<CreateArticleForm {...exampleProps}/>);
     testComponent.find("[name=\"title\"]").simulate("change", {
         target: {
           name: "title",
@@ -68,7 +73,7 @@ describe("CreateArticleForm", () => {
   });
 
   it("can handle TextArea input", (done) => {
-    testComponent = mount(<CreateArticleForm {...exampleProps}/>);
+    testComponent = shallow(<CreateArticleForm {...exampleProps}/>);
     testComponent.find("[name=\"blogText\"]").simulate("change", {
         target: {
           name: "blogText",
@@ -81,7 +86,11 @@ describe("CreateArticleForm", () => {
 
   it("can submit form", (done) => {
     const submitStub: any = sandbox.stub(CreateArticleForm.prototype, "handleSubmitForm" as any);
-    testComponent = mount(<CreateArticleForm {...exampleProps}/>);
+    testComponent = mount(
+      <MemoryRouter>
+        <CreateArticleForm {...exampleProps}/>
+      </MemoryRouter>,
+    );
     testComponent.find("form").first().simulate("submit");
     expect(submitStub.called).to.equal(true);
     done();
@@ -100,7 +109,11 @@ describe("CreateArticleForm", () => {
         resolve(response);
       });
       createStub.returns(promise);
-      testComponent = mount(<CreateArticleForm {...exampleProps} onSubmit={createStub}/>);
+      testComponent = mount(
+        <MemoryRouter>
+          <CreateArticleForm {...exampleProps} onSubmit={createStub}/>
+        </MemoryRouter>,
+      );
       testComponent.find("[name=\"title\"]").simulate("change", {
         target: {
           name: "title",
@@ -118,7 +131,11 @@ describe("CreateArticleForm", () => {
 
     it("and block submissions without a title", (done) => {
     const alertMessage: string = "A post cannot have an empty title";
-    testComponent = mount(<CreateArticleForm {...exampleProps}/>);
+    testComponent = mount(
+      <MemoryRouter>
+        <CreateArticleForm {...exampleProps}/>
+      </MemoryRouter>,
+    );
     testComponent.find("form").first().simulate("submit");
     expect(alertStub.called).to.equal(true);
     done();
@@ -131,7 +148,11 @@ describe("CreateArticleForm", () => {
     });
     createStub.returns(promise);
 
-    testComponent = mount(<CreateArticleForm {...exampleProps} onSubmit={createStub}/>);
+    testComponent = mount(
+      <MemoryRouter>
+        <CreateArticleForm {...exampleProps} onSubmit={createStub}/>
+      </MemoryRouter>,
+    );
     testComponent.find("[name=\"title\"]").simulate("change", {
         target: {
           name: "title",
@@ -154,7 +175,11 @@ describe("CreateArticleForm", () => {
     });
     createStub.returns(promise);
 
-    testComponent = mount(<CreateArticleForm {...exampleProps} onSubmit={createStub}/>);
+    testComponent = mount(
+      <MemoryRouter>
+        <CreateArticleForm {...exampleProps} onSubmit={createStub}/>
+      </MemoryRouter>,
+    );
     testComponent.find("[name=\"title\"]").simulate("change", {
       target: {
         name: "title",
@@ -206,30 +231,38 @@ describe("CreateArticleForm", () => {
       const createPromise = new bluebird.Promise((resolve) => {
         resolve(alertMessage);
       });
-      testComponent = mount(<CreateArticleForm {...exampleProps}/>);
+      testComponent = mount(
+        <MemoryRouter>
+          <CreateArticleForm {...exampleProps}/>
+        </MemoryRouter>,
+      );
       previewStub.returns(promise);
       createStub.returns(createPromise);
 
-      testComponent.find("[name=\"title\"]").simulate("change", {
+      testComponent.find(CreateArticleForm).find("[name=\"title\"]").simulate("change", {
           target: {
             name: "title",
             value: "Great Title",
           },
         });
-      testComponent.find("button").at(0).simulate("click");
+      testComponent.find(CreateArticleForm).find("button").at(0).simulate("click");
       expect(previewStub.called).to.equal(true);
       promise.finally(() => {
-        expect(testComponent.state()).to.have.property("showModal", true);
-        expect(testComponent.state().post).to.have.property("author", "sips");
+        expect(testComponent.find(CreateArticleForm).state()).to.have.property("showModal", true);
+        expect(testComponent.find(CreateArticleForm).state().post).to.have.property("author", "sips");
         testComponent.update();
-        testComponent.find(".preview-post").first().simulate("click");
+        testComponent.find(CreateArticleForm).find(".preview-post").first().simulate("click");
         expect(submitStub.called).to.equal(true);
         done();
       });
     });
 
     it("and handle req error", (done) => {
-      testComponent = mount(<CreateArticleForm {...exampleProps}/>);
+      testComponent = mount(
+        <MemoryRouter>
+          <CreateArticleForm {...exampleProps}/>
+        </MemoryRouter>,
+      );
       const promise = new bluebird.Promise((resolve, reject) => {
         reject(new Error("cpssd will last. haha jk"));
       });

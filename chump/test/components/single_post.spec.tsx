@@ -5,7 +5,7 @@ import * as ReactDOM from "react-dom";
 import { MemoryRouter } from "react-router";
 import * as sinon from "sinon";
 
-import { SinglePost } from "../../src/components/single_post";
+import { SinglePost } from "../../src/components/article/single_post";
 import { IParsedPost } from "../../src/models/posts";
 import { mount, shallow } from "./enzyme";
 

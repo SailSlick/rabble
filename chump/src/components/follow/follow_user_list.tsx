@@ -1,11 +1,11 @@
 import * as Promise from "bluebird";
 import * as React from "react";
 
-import * as config from "../../rabble_config.json";
-import { GetFollowers, GetFollowing } from "../models/follow";
-import { IParsedUser } from "../models/user";
-import { RootComponent } from "./root_component";
-import { User } from "./user";
+import * as config from "../../../rabble_config.json";
+import { GetFollowers, GetFollowing } from "../../models/follow";
+import { IParsedUser } from "../../models/user";
+import { RootComponent } from "../root_component";
+import { User } from "../account/user";
 
 interface IFollowProps {
   viewing: string;

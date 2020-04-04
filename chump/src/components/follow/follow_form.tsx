@@ -2,9 +2,9 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 import * as request from "superagent";
 
-import * as config from "../../rabble_config.json";
-import { CreateFollow, CreateRssFollow } from "../models/follow";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { CreateFollow, CreateRssFollow } from "../../models/follow";
+import { RootComponent } from "../root_component";
 
 interface IFormState {
   toFollow: string;

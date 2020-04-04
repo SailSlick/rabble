@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { RootComponent } from "./root_component";
+import { RootComponent } from "../root_component";
 
 interface ITagProps {
   tags: string[];

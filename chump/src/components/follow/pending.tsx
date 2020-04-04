@@ -1,7 +1,7 @@
 import * as React from "react";
-import * as config from "../../rabble_config.json";
-import { AcceptFollow, GetPendingFollows, IPendingFollow, IPendingFollows } from "../models/follow";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { AcceptFollow, GetPendingFollows, IPendingFollow, IPendingFollows } from "../../models/follow";
+import { RootComponent } from "../root_component";
 
 interface IPendingProps {
   username: string;

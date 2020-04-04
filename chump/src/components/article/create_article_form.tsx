@@ -1,14 +1,14 @@
 import * as React from "react";
 import * as RModal from "react-modal";
-import { HashRouter } from "react-router-dom";
+import { HashRouter, Redirect } from "react-router-dom";
 import * as TagsInput from "react-tagsinput";
 import * as request from "superagent";
 
-import * as config from "../../rabble_config.json";
-import { CreatePreview } from "../models/article";
-import { IParsedPost } from "../models/posts";
+import * as config from "../../../rabble_config.json";
+import { CreatePreview } from "../../models/article";
+import { IParsedPost } from "../../models/posts";
 import { Post } from "./post";
-import { RootComponent } from "./root_component";
+import { RootComponent } from "../root_component";
 
 interface IFormState {
   blogText: string;
@@ -17,6 +17,7 @@ interface IFormState {
   tags: string[];
   title: string;
   summary: string;
+  newArticleId: string;
 }
 
 interface IFormProps {
@@ -62,6 +63,7 @@ export class CreateArticleForm extends RootComponent<IFormProps, IFormState> {
       summary: "",
       tags: [],
       title: "",
+      newArticleId: "",
     };
 
     this.handleTitleInputChange = this.handleTitleInputChange.bind(this);
@@ -126,6 +128,10 @@ export class CreateArticleForm extends RootComponent<IFormProps, IFormState> {
   }
 
   public render() {
+    if (this.state.newArticleId != "") {
+      return <Redirect to={{ pathname: `/@${this.props.username}/${this.state.newArticleId}` }}/>;
+    }
+
     const previewModel = this.renderModal();
     return (
       <div>
@@ -263,9 +269,9 @@ export class CreateArticleForm extends RootComponent<IFormProps, IFormState> {
       showModal = false;
     }
 
-    this.props.onSubmit(this.state.title, this.state.blogText, this.state.tags, this.state.summary)
+    return this.props.onSubmit(this.state.title, this.state.blogText, this.state.tags, this.state.summary)
       .then((res: request.Response) => {
-        if (res.status !== 200) {
+        if (res.status !== 200 || typeof(res.body) === "undefined") {
           this.errorToast({ debug: res, statusCode: res.status });
           return;
         }
@@ -276,6 +282,7 @@ export class CreateArticleForm extends RootComponent<IFormProps, IFormState> {
           summary: "",
           tags: [],
           title: "",
+          newArticleId: res.body.id
         });
       })
       .catch((err: Error) => {

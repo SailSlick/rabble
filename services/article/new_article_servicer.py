@@ -1,7 +1,6 @@
 from services.proto import article_pb2
 from services.proto import database_pb2
 from services.proto import create_pb2
-from services.proto import recommend_posts_pb2
 from services.proto import search_pb2
 from services.proto import general_pb2
 from utils.articles import convert_to_tags_string, md_to_html
@@ -102,6 +101,7 @@ class NewArticleServicer:
         if success == general_pb2.ResultType.OK:
             self._logger.info('Article created.')
             resp.result_type = general_pb2.ResultType.OK
+            resp.global_id = str(global_id)
             if not req.foreign:
                 # TODO (sailslick) persist create activities
                 # or add to queueing service

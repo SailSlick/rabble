@@ -5,9 +5,9 @@ import { Link, RouteProps } from "react-router-dom";
 import { IParsedPost } from "../models/posts";
 import { ISearchResponse, SearchRequest } from "../models/search";
 import { IParsedUser } from "../models/user";
-import { Post } from "./post";
+import { User } from "./account/user";
+import { Post } from "./article/post";
 import { RootComponent } from "./root_component";
-import { User } from "./user";
 
 interface ISearchResultsProps extends RouteProps {
   match: {

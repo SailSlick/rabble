@@ -1,12 +1,12 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 
-import * as config from "../../rabble_config.json";
-import { IAnyParsedPost, IParsedSharedPost, IsSharedPost} from "../models/posts";
-import { FollowButton} from "./follow_button";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { IAnyParsedPost, IParsedSharedPost, IsSharedPost} from "../../models/posts";
+import { FollowButton} from "../follow/follow_button";
+import { RootComponent } from "../root_component";
 import { Tags } from "./tags";
-import { GenerateUserLinks, GetCustomCSS, RemoveProtocol } from "./util";
+import { GenerateUserLinks, GetCustomCSS, RemoveProtocol } from "../util";
 
 interface ICardProps {
   blogPost: IAnyParsedPost;

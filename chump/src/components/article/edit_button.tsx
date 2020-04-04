@@ -2,9 +2,9 @@ import * as React from "react";
 import { Edit } from "react-feather";
 import { Redirect } from "react-router-dom";
 
-import * as config from "../../rabble_config.json";
-import { IParsedPost } from "../models/posts";
-import { RootComponent } from "./root_component";
+import * as config from "../../../rabble_config.json";
+import { IParsedPost } from "../../models/posts";
+import { RootComponent } from "../root_component";
 
 interface IEditProps {
   username: string;
