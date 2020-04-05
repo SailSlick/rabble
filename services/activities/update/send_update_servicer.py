@@ -70,7 +70,7 @@ class SendUpdateServicer:
                 "User %d requested to edit article belonging to user %d",
                 req.user_id, article.author_id)
             return general_pb2.GeneralResponse(
-                result_type=general_pb2.ResultType.DENIED
+                result_type=general_pb2.ResultType.ERROR_401
             )
         # Update article locally
         if not self._update_locally(article, req):

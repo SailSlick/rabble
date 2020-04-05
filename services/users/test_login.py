@@ -75,7 +75,7 @@ class LoginHandlerTest(unittest.TestCase):
             results=[user],
         )
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, users_pb2.LoginResponse.ACCEPTED)
+        self.assertEqual(resp.result, general_pb2.ResultType.OK)
         self.assertEqual(resp.display_name, user.display_name)
         self.assertEqual(resp.global_id, user.global_id)
 
@@ -86,7 +86,7 @@ class LoginHandlerTest(unittest.TestCase):
             results=[self._make_user(b"password123")],
         )
         resp = self.login_handler.Login(req, None)
-        self.assertEqual(resp.result, general_pb2.ResultType.DENIED)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR_401)
 
     def test_blank_password(self):
         req = self._make_request()

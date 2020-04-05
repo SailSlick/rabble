@@ -46,6 +46,7 @@ if [ "$RABBLE_POSTS_RECOMMENDER_METHOD" != "none" ]; then
   RABBLE_POSTS_SERVICE_LOCATION="./services/recommend_posts"
 fi
 export RABBLE_POSTS_SERVICE_LOCATION
+
 . build_out/containers/gen_first_config.sh
 . build_out/containers/gen_second_config.sh
 

@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
-import os
-import sys
 
 from services.proto import database_pb2_grpc
 from services.proto import update_pb2_grpc
@@ -16,25 +13,18 @@ from utils.users import UsersUtil
 from servicer import S2SUpdateServicer
 
 
-def get_args():
-    parser = argparse.ArgumentParser('Run the update activity microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def get_db_stub(logger):
     chan = get_service_channel(logger, "DB_SERVICE_HOST", 1798)
     return database_pb2_grpc.DatabaseStub(chan)
+
 
 def get_md_stub(logger):
     chan = get_service_channel(logger, "MDC_SERVICE_HOST", 1937)
     return mdc_pb2_grpc.ConverterStub(chan)
 
+
 def main():
-    args = get_args()
-    logger = get_logger("update_service", args.v)
+    logger = get_logger("update_service")
     db_stub = get_db_stub(logger)
     md_stub = get_md_stub(logger)
     activ_util = ActivitiesUtil(logger, db_stub)

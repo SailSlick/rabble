@@ -1,16 +1,15 @@
 import os
-import grpc
+import sys
 import logging
 from services.proto import logger_pb2
 from services.proto import logger_pb2_grpc
 from google.protobuf.timestamp_pb2 import Timestamp
 from utils.connect import get_service_channel
 
-
 LOGGER_ENV_VAR = 'LOGGER_SERVICE_HOST'
 
 
-def get_logger(name, level):
+def get_logger(name, level="INFO"):
     logger = logging.getLogger(name)
     # The logger should process everything.
     logger.setLevel(logging.DEBUG)
@@ -20,8 +19,8 @@ def get_logger(name, level):
     logger.addHandler(sh)
 
     if not os.environ.get(LOGGER_ENV_VAR):
-        logger.warning(LOGGER_ENV_VAR,
-                       'env var not set, only logging locally')
+        print("Please set {} env variable".format(LOGGER_ENV_VAR))
+        sys.exit(1)
     else:
         logger.addHandler(GrpcHandler(logger, name))
     return logger
@@ -60,4 +59,3 @@ class GrpcHandler(logging.Handler):
     def close(self):
         self.channel.close()
         super(GrpcHandler, self).close()
-

@@ -105,7 +105,7 @@ func TestConvertFeedItemDatetime(t *testing.T) {
 	}
 }
 
-func TestConvertRssUrlToHandle(t *testing.T) {
+func TestconvertRssURLToHandle(t *testing.T) {
 	tests := []struct {
 		in   string
 		want string
@@ -130,9 +130,9 @@ func TestConvertRssUrlToHandle(t *testing.T) {
 
 	sw := newTestServerWrapper()
 	for _, tcase := range tests {
-		convertedHandle := sw.convertRssUrlToHandle(tcase.in)
+		convertedHandle := sw.convertRssURLToHandle(tcase.in)
 		if convertedHandle != tcase.want {
-			t.Fatalf("convertRssUrlToHandle(%v), wanted: %v, got: %v",
+			t.Fatalf("convertRssURLToHandle(%v), wanted: %v, got: %v",
 				tcase.in, tcase.want, convertedHandle)
 		}
 	}
@@ -228,7 +228,7 @@ func TestNewRssFollow(t *testing.T) {
 		t.Fatalf("NewRssFollow(%v), unexpected error: %v", req.RssUrl, err)
 	}
 
-	if r.ResultType != pb.NewRssFeedResponse_ACCEPTED {
+	if r.ResultType != pb.ResultType_ACCEPTED {
 		t.Fatalf("NewRssFollow(%v), received non accept result_type: %v", req.RssUrl, r.ResultType)
 	}
 }

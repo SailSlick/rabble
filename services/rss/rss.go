@@ -14,8 +14,10 @@ import (
 	"time"
 
 	pb "github.com/cpssd/rabble/services/proto"
+	utils "github.com/cpssd/rabble/services/utils"
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	wrappers "github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/mmcdole/gofeed"
 	"google.golang.org/grpc"
 )
@@ -53,12 +55,12 @@ func (s *serverWrapper) convertFeedItemDatetime(gi *gofeed.Item) (*tspb.Timestam
 	protoTimestamp, protoTimeErr := ptypes.TimestampProto(parsedTimestamp)
 	if protoTimeErr != nil {
 		log.Printf("Error converting timestamp: %s\n", protoTimeErr)
-		return nil, fmt.Errorf("Invalid timestamp\n")
+		return nil, fmt.Errorf("Invalid timestamp")
 	}
 	return protoTimestamp, nil
 }
 
-func (s *serverWrapper) convertRssUrlToHandle(url string) string {
+func (s *serverWrapper) convertRssURLToHandle(url string) string {
 	// Converts url in form: https://news.ycombinator.com/rss
 	// to: news.ycombinator.com-rss
 	if strings.HasPrefix(url, "http") {
@@ -136,10 +138,10 @@ func (s *serverWrapper) GetUser(ctx context.Context, globalID int64) (*pb.UsersE
 		return nil, fmt.Errorf(findUserErrorFmt, globalID, findResp.Error)
 	}
 	if len(findResp.Results) < 1 {
-		return nil, fmt.Errorf("No users in db with id: %v\n", globalID)
+		return nil, fmt.Errorf("No users in db with id: %v", globalID)
 	}
 	if len(findResp.Results) > 1 {
-		return nil, fmt.Errorf("Multiple users with id: %v in db\n", globalID)
+		return nil, fmt.Errorf("Multiple users with id: %v in db", globalID)
 	}
 	return findResp.Results[0], nil
 }
@@ -179,14 +181,14 @@ func (s *serverWrapper) PerUserRss(ctx context.Context, r *pb.UsersEntry) (*pb.R
 	ue, userErr := s.GetUser(ctx, r.GlobalId)
 	if userErr != nil {
 		log.Printf("PerUserRss user find got: %v\n", userErr.Error())
-		rssr.ResultType = pb.RssResponse_ERROR
+		rssr.ResultType = pb.ResultType_ERROR
 		rssr.Message = userErr.Error()
 		return rssr, nil
 	}
 
 	if ue.Private != nil && ue.Private.Value {
 		log.Printf("id: %s is a private user.\n", r.GlobalId)
-		rssr.ResultType = pb.RssResponse_ERROR
+		rssr.ResultType = pb.ResultType_ERROR_401
 		rssr.Message = "Can not create RSS feed for private user."
 		return rssr, nil
 	}
@@ -195,7 +197,7 @@ func (s *serverWrapper) PerUserRss(ctx context.Context, r *pb.UsersEntry) (*pb.R
 	posts, postFindErr := s.GetUserPosts(ctx, ue.GlobalId)
 	if postFindErr != nil {
 		log.Printf("PerUserRss posts find got: %v\n", postFindErr.Error())
-		rssr.ResultType = pb.RssResponse_ERROR
+		rssr.ResultType = pb.ResultType_ERROR
 		rssr.Message = postFindErr.Error()
 		return rssr, nil
 	}
@@ -221,7 +223,7 @@ func (s *serverWrapper) PerUserRss(ctx context.Context, r *pb.UsersEntry) (*pb.R
 	}
 
 	rssFeed += rssDeclareEnd
-	rssr.ResultType = pb.RssResponse_ACCEPTED
+	rssr.ResultType = pb.ResultType_OK
 	rssr.Feed = rssFeed
 
 	return rssr, nil
@@ -235,12 +237,12 @@ func (s *serverWrapper) NewRssFollow(ctx context.Context, r *pb.NewRssFeed) (*pb
 
 	if err != nil {
 		log.Println(err)
-		rssr.ResultType = pb.NewRssFeedResponse_ERROR
+		rssr.ResultType = pb.ResultType_ERROR
 		rssr.Message = err.Error()
 		return rssr, nil
 	}
 
-	handle := s.convertRssUrlToHandle(r.RssUrl)
+	handle := s.convertRssURLToHandle(r.RssUrl)
 	bio := "RSS/Atom feed from " + handle + " converted to a Rabble user"
 	// add new user with feed details
 	urInsert := &pb.UsersRequest{
@@ -250,98 +252,46 @@ func (s *serverWrapper) NewRssFollow(ctx context.Context, r *pb.NewRssFeed) (*pb
 			Rss:        r.RssUrl,
 			Bio:        bio,
 			HostIsNull: true,
+			Private:    &wrappers.BoolValue{Value: true},
 		},
 	}
 	insertResp, insertErr := s.db.Users(ctx, urInsert)
 
 	if insertErr != nil {
 		log.Printf("Error on rss user insert: %v\n", insertErr)
-		rssr.ResultType = pb.NewRssFeedResponse_ERROR
+		rssr.ResultType = pb.ResultType_ERROR
 		rssr.Message = insertErr.Error()
 		return rssr, nil
 	}
 
 	if insertResp.ResultType != pb.ResultType_OK {
 		log.Printf("Rss user insert failed. message: %v\n", insertResp.Error)
-		rssr.ResultType = pb.NewRssFeedResponse_ERROR
+		rssr.ResultType = pb.ResultType_ERROR
 		rssr.Message = insertResp.Error
 		return rssr, nil
 	}
 
-	// get that new user's globalId
-	urFind := &pb.UsersRequest{
-		RequestType: pb.UsersRequest_FIND,
-		Match: &pb.UsersEntry{
-			Handle:     handle,
-			Rss:        r.RssUrl,
-			HostIsNull: true,
-		},
-	}
-	findResp, findErr := s.db.Users(ctx, urFind)
-
-	if findErr != nil {
-		log.Printf("Error on rss user find: %v\n", findErr)
-		rssr.ResultType = pb.NewRssFeedResponse_ERROR
-		rssr.Message = findErr.Error()
-		return rssr, nil
-	}
-
-	if findResp.ResultType != pb.ResultType_OK || len(findResp.Results) < 1 {
-		log.Printf("Rss user find failed. message: %v\n", findResp.Error)
-		rssr.ResultType = pb.NewRssFeedResponse_ERROR
-		rssr.Message = findResp.Error
-		return rssr, nil
-	}
-
-	log.Println(feed.Title)
 	// convert feed to post items and save
-	s.createArticlesFromFeed(ctx, feed, findResp.Results[0].GlobalId)
+	s.createArticlesFromFeed(ctx, feed, insertResp.GlobalId)
 
-	rssr.ResultType = pb.NewRssFeedResponse_ACCEPTED
-	rssr.GlobalId = findResp.Results[0].GlobalId
+	rssr.ResultType = pb.ResultType_OK
+	rssr.GlobalId = insertResp.GlobalId
 
 	return rssr, nil
 }
 
-func createDatabaseClient() (*grpc.ClientConn, pb.DatabaseClient) {
-	host := os.Getenv("DB_SERVICE_HOST")
-	if host == "" {
-		log.Fatal("DB_SERVICE_HOST env var not set for rss service.")
-	}
-	addr := host + ":1798"
-
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Rss server did not connect to db: %v", err)
-	}
-	client := pb.NewDatabaseClient(conn)
-	return conn, client
-}
-
-func createArticleClient() (*grpc.ClientConn, pb.ArticleClient) {
-	host := os.Getenv("ARTICLE_SERVICE_HOST")
-	if host == "" {
-		log.Fatal("ARTICLE_SERVICE_HOST env var not set for rss service.")
-	}
-	addr := host + ":1601"
-
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Rss server did not connect to article service: %v", err)
-	}
-	client := pb.NewArticleClient(conn)
-	return conn, client
-}
-
 func buildServerWrapper() *serverWrapper {
-	dbConn, dbClient := createDatabaseClient()
-	artConn, artClient := createArticleClient()
-	fp := gofeed.NewParser()
-	grpcSrv := grpc.NewServer()
 	hostname := os.Getenv("HOST_NAME")
 	if hostname == "" {
 		log.Fatal("HOST_NAME env var not set for rss service.")
 	}
+
+	dbConn := utils.GrpcConn("DB_SERVICE_HOST", "1798")
+	dbClient := pb.NewDatabaseClient(dbConn)
+	artConn := utils.GrpcConn("ARTICLE_SERVICE_HOST", "1601")
+	artClient := pb.NewArticleClient(artConn)
+	fp := gofeed.NewParser()
+	grpcSrv := grpc.NewServer()
 
 	return &serverWrapper{
 		dbConn:     dbConn,

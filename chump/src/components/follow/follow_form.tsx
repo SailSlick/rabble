@@ -7,6 +7,7 @@ import { CreateFollow, CreateRssFollow } from "../../models/follow";
 import { RootComponent } from "../root_component";
 
 interface IFormState {
+  placeholder: string;
   toFollow: string;
   type: string;
 }
@@ -16,13 +17,19 @@ export interface IFormProps {
   userId: number;
 }
 
+const username_placeholder = "user[@instance.com]";
+const feed_placeholder = "https://examplesite.com/feed";
+const username_type = "username";
+const feed_type = "feed";
+
 export class FollowForm extends RootComponent<IFormProps, IFormState> {
   constructor(props: IFormProps) {
     super(props);
 
     this.state = {
+      placeholder: username_placeholder,
       toFollow: "",
-      type: "username",
+      type: username_type,
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -40,18 +47,17 @@ export class FollowForm extends RootComponent<IFormProps, IFormState> {
             value={this.state.toFollow}
             onChange={this.handleInputChange}
             className="pure-input-1-2 blog-input"
-            placeholder="user[@instance.com]"
+            placeholder={this.state.placeholder}
           />
           <label>
-            {config.type}: &nbsp;
             <select
               id="type"
-              className="pure-input-4-5"
+              className="pure-input-2-5"
               onChange={this.handleDropdownChange}
               value={this.state.type}
             >
-                <option value="username">{config.username}</option>
-                <option value="url">Rss/Atom</option>
+                <option value={username_type}>{config.username}</option>
+                <option value={feed_type}>Rss/Atom</option>
             </select>
           </label>
         </div>
@@ -73,14 +79,20 @@ export class FollowForm extends RootComponent<IFormProps, IFormState> {
   }
 
   private handleDropdownChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    let placeholder = username_placeholder;
+    if (event.target.value == feed_type) {
+      placeholder = feed_placeholder;
+    }
+
     this.setState({
+      placeholder,
       type: event.target.value,
     });
   }
 
   private handleSubmitForm(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const promise = (this.state.type === "url")
+    const promise = (this.state.type === feed_type)
       ? CreateRssFollow(this.props.username, this.state.toFollow)
       : CreateFollow(this.props.username, this.state.toFollow, "");
 
@@ -93,7 +105,7 @@ export class FollowForm extends RootComponent<IFormProps, IFormState> {
 
       this.setState({
         toFollow: "",
-        type: "username",
+        type: username_type,
       });
     })
     .catch((err: Error) => {

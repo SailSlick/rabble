@@ -18,15 +18,12 @@ def get_args():
     parser.add_argument(
         '--db_path', default='rabble.db',
         help='The path to the sqlite database file')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
     return parser.parse_args()
 
 
 def main():
     args = get_args()
-    logger = get_logger("database_service", args.v)
+    logger = get_logger("database_service")
     logger.info("Creating DB with path: " + args.db_path)
     database = build_database(logger, args.schema, args.db_path)
     logger.info("Creating server")

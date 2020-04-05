@@ -29,7 +29,7 @@ class UpdateHandler:
 
         if err is not None:
             return users_pb2.UpdateUserResponse(
-                result=general_pb2.ResultType.DENIED,
+                result=general_pb2.ResultType.ERROR_401,
             )
 
         pw = None
@@ -57,5 +57,5 @@ class UpdateHandler:
             )
 
         return users_pb2.UpdateUserResponse(
-            result=users_pb2.UpdateUserResponse.ACCEPTED,
+            result=general_pb2.ResultType.OK,
         )

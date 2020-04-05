@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
 
@@ -15,17 +14,8 @@ from services.proto import s2s_follow_pb2_grpc
 from services.proto import database_pb2_grpc
 
 
-def get_args():
-    parser = argparse.ArgumentParser('Run the follow activity microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def main():
-    args = get_args()
-    logger = get_logger("s2s_follow_service", args.v)
+    logger = get_logger("s2s_follow_service")
     users_util = UsersUtil(logger, None)
     with get_future_channel(logger, "DB_SERVICE_HOST", 1798) as db_chan, \
             get_future_channel(logger, "FOLLOWS_SERVICE_HOST", 1641) as logger_chan:

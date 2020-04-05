@@ -6,7 +6,7 @@ enum ResultType {
   OK = 0;
   ERROR = 1;
   ERROR_400 = 2;
-  DENIED = 3;
+  ERROR_401 = 3;
 }
 
 message GeneralResponse {

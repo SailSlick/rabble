@@ -80,7 +80,7 @@ class UpdateHandlerTest(unittest.TestCase):
 
         req = self._make_request()
         resp = self.update_handler.Update(req, None)
-        self.assertEqual(resp.result, users_pb2.UpdateUserResponse.ACCEPTED)
+        self.assertEqual(resp.result, general_pb2.ResultType.OK)
 
     def test_incorrect_password(self):
         req = self._make_request()
@@ -89,4 +89,4 @@ class UpdateHandlerTest(unittest.TestCase):
             results=[self._make_user(b"password123")],
         )
         resp = self.update_handler.Update(req, None)
-        self.assertEqual(resp.result, general_pb2.ResultType.DENIED)
+        self.assertEqual(resp.result, general_pb2.ResultType.ERROR_401)

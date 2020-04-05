@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
 
@@ -16,17 +15,8 @@ from services.proto import mdc_pb2_grpc
 from services.proto import search_pb2_grpc
 
 
-def get_args():
-    parser = argparse.ArgumentParser('Run the rabble article microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def main():
-    args = get_args()
-    logger = get_logger("article_service", args.v)
+    logger = get_logger("article_service")
 
     db_channel = get_service_channel(logger, "DB_SERVICE_HOST", 1798)
     db_stub = database_pb2_grpc.DatabaseStub(db_channel)

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"time"
 
 	pb "github.com/cpssd/rabble/services/proto"
@@ -327,16 +326,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	host := os.Getenv("DB_SERVICE_HOST")
-	if host == "" {
-		log.Fatal("DB_SERVICE_HOST env var not set for feed service.")
-	}
-	addr := host + ":1798"
-
-	c, err := grpc.Dial(addr, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Could not connect to database: %v", err)
-	}
+	c := utils.GrpcConn("DB_SERVICE_HOST", "1798")
 	defer c.Close()
 
 	grpcSrv := grpc.NewServer()

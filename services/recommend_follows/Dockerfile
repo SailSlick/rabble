@@ -9,4 +9,4 @@ RUN pip3 install requests-http-signature
 
 ENV PYTHONPATH="/repo/build_out"
 
-CMD ["python3", "-u", "-B", "/repo/build_out/recommend_follows/main.py", "-v"]
+CMD ["python3", "-u", "-B", "/repo/build_out/recommend_follows/main.py"]

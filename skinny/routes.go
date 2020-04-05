@@ -46,19 +46,24 @@ func (s *serverWrapper) setupRoutes() {
 	r.HandleFunc("/c2s/edit_article", s.handleEditArticle())
 	r.HandleFunc("/c2s/delete_article", s.handleDeleteArticle())
 	r.HandleFunc("/c2s/preview_article", s.handlePreviewArticle())
+	r.HandleFunc("/c2s/article/{article_id}", s.handlePerArticlePage())
+
 	r.HandleFunc("/c2s/feed", s.handleFeed())
 	r.HandleFunc("/c2s/feed/{userId}", s.handleFeed())
+	r.HandleFunc("/c2s/search", s.handleSearch())
 	r.HandleFunc("/c2s/@{username}", s.handleFeedPerUser())
 	r.HandleFunc("/c2s/{userId}/rss", s.handleRssPerUser())
+
 	r.HandleFunc("/c2s/{userId}/css", s.handleUserCSS())
-	r.HandleFunc("/c2s/article/{article_id}", s.handlePerArticlePage())
+	r.HandleFunc("/c2s/register", s.handleRegister())
+	r.HandleFunc("/c2s/login", s.handleLogin())
+	r.HandleFunc("/c2s/logout", s.handleLogout())
 	r.HandleFunc("/c2s/@{username}/followers", s.handleGetFollowers())
 	r.HandleFunc("/c2s/@{username}/following", s.handleGetFollowing())
 	r.HandleFunc("/c2s/@{username}/details", s.handleUserDetails())
-
-	// TODO(sailslick): move these below after user_id change comes in
-	// That change will stop perArticle from catching all urls
-	// These may be no-op services
+	r.HandleFunc("/c2s/@{username}/verify_feed", s.handleFeedUserVerification())
+	r.HandleFunc("/c2s/update/user", s.handleUserUpdate())
+	r.HandleFunc("/c2s/update/user_pic", s.handleUserUpdateProfilePic())
 	r.HandleFunc("/c2s/{userId}/recommend_follows",
 		s.getNoOpServiceHandler(followServiceLocationEnv, s.handleRecommendFollows()))
 	r.HandleFunc("/c2s/recommend_posts",
@@ -67,18 +72,13 @@ func (s *serverWrapper) setupRoutes() {
 	r.HandleFunc("/c2s/follow", s.handleFollow())
 	r.HandleFunc("/c2s/unfollow", s.handleUnfollow())
 	r.HandleFunc("/c2s/rss_follow", s.handleRssFollow())
-	r.HandleFunc("/c2s/register", s.handleRegister())
-	r.HandleFunc("/c2s/search", s.handleSearch())
-	r.HandleFunc("/c2s/login", s.handleLogin())
-	r.HandleFunc("/c2s/logout", s.handleLogout())
-	r.HandleFunc("/c2s/like", s.handleLike())
-	r.HandleFunc("/c2s/update/user", s.handleUserUpdate())
-	r.HandleFunc("/c2s/update/user_pic", s.handleUserUpdateProfilePic())
 	r.HandleFunc("/c2s/follows/pending", s.handlePendingFollows())
 	r.HandleFunc("/c2s/follows/accept", s.handleAcceptFollow())
+	r.HandleFunc("/c2s/announce", s.handleAnnounce())
+	r.HandleFunc("/c2s/like", s.handleLike())
+
 	r.HandleFunc("/c2s/track_view", s.handleTrackView())
 	r.HandleFunc("/c2s/add_log", s.handleAddLog())
-	r.HandleFunc("/c2s/announce", s.handleAnnounce())
 
 	approvalHandler := s.handleApprovalActivity()
 	// ActorInbox routes are routed based on the activity type

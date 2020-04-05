@@ -8,6 +8,7 @@ then
   exit 1
 fi
 
+export RABBLE_LOG_LEVEL="INFO"
 export RABBLE_SKINNY_HOST="skinny_1"
 export RABBLE_SKINNY_PORT="1916"
 export RABBLE_INSTANCE_ID="1"

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
 
@@ -15,14 +14,6 @@ from utils.users import UsersUtil
 from activities.announce.servicer import AnnounceServicer
 
 
-def get_args():
-    parser = argparse.ArgumentParser('Run the announce activity microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def get_db_stub(logger):
     chan = get_service_channel(logger, "DB_SERVICE_HOST", 1798)
     return database_pb2_grpc.DatabaseStub(chan)
@@ -34,8 +25,7 @@ def get_article_stub(logger):
 
 
 def main():
-    args = get_args()
-    logger = get_logger("announce_service", args.v)
+    logger = get_logger("announce_service")
     db_stub = get_db_stub(logger)
     article_stub = get_article_stub(logger)
     user_util = UsersUtil(logger, db_stub)

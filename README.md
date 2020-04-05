@@ -32,7 +32,7 @@ To change these options set the corresponding environment variable when running
 ## Running Rabble
 
 After doing a build you can run Rabble by executing the `start.sh` script.
-Docker and docker-compose are both requried.
+Docker and docker-compose are both required.
 
 NOTE: If you have made changes to a microservice it will only be rebuilt if its
 context directory changes. To manually rebuild run

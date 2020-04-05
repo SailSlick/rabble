@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
 
@@ -13,18 +12,8 @@ from services.proto import database_pb2_grpc
 from services.proto import recommend_posts_pb2_grpc
 
 
-def get_args():
-    parser = argparse.ArgumentParser(
-        'Run the Rabble recommend_posts microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def main():
-    args = get_args()
-    logger = get_logger('recommend_posts_service', args.v)
+    logger = get_logger('recommend_posts_service')
     logger.info('Creating recommend_posts server')
 
     with get_service_channel(logger, "DB_SERVICE_HOST", 1798) as db_chan:
@@ -34,8 +23,8 @@ def main():
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
         servicer = PostRecommendationsServicer(users_util, logger, db_stub)
-        recommend_posts_pb2_grpc.add_PostRecommendationsServicer_to_server(servicer,
-                                                                           server)
+        recommend_posts_pb2_grpc.add_PostRecommendationsServicer_to_server(
+            servicer, server)
 
         server.add_insecure_port('0.0.0.0:1814')
         logger.info("Starting recommend_posts service on port 1814")

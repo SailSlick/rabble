@@ -315,12 +315,12 @@ func (s *serverWrapper) handleRssPerUser() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		if resp.ResultType == pb.RssResponse_ERROR {
+		if resp.ResultType == pb.ResultType_ERROR {
 			log.Printf("Error in rss.PerUserRss(%v): %v", *ue, resp.Message)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if resp.ResultType == pb.RssResponse_DENIED {
+		if resp.ResultType == pb.ResultType_ERROR_401 {
 			log.Printf("Access denied in rss.PerUserRss(%v): %v", *ue, resp.Message)
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -513,7 +513,7 @@ func (s *serverWrapper) handleEditArticle() http.HandlerFunc {
 			cResp.Error = "Issue with editing article"
 			enc.Encode(cResp)
 			return
-		} else if resp.ResultType == pb.ResultType_DENIED {
+		} else if resp.ResultType == pb.ResultType_ERROR_401 {
 			log.Printf("Editing of article denied")
 			w.WriteHeader(http.StatusForbidden)
 			cResp.Error = "Editing of article is denied"
@@ -584,7 +584,7 @@ func (s *serverWrapper) handleDeleteArticle() http.HandlerFunc {
 			cResp.Error = "Issue with deleting article"
 			enc.Encode(cResp)
 			return
-		} else if resp.ResultType == pb.ResultType_DENIED {
+		} else if resp.ResultType == pb.ResultType_ERROR_401 {
 			log.Printf("Deletion of article denied")
 			w.WriteHeader(http.StatusForbidden)
 			cResp.Error = "Deletion of article is denied"

@@ -1,8 +1,5 @@
-import os
-import sys
 from urllib.parse import urlparse
 
-from services.proto import database_pb2
 from services.proto import rss_pb2
 from services.proto import general_pb2
 
@@ -40,7 +37,7 @@ class RssFollowServicer:
 
         # check response for new/rss service id
         if (rss_resp.result_type == general_pb2.ResultType.ERROR or
-                rss_resp.result_type == general_pb2.ResultType.DENIED):
+                rss_resp.result_type == general_pb2.ResultType.ERROR_401):
             self._logger.error("Rss service couldn't follow url: %s", feed_url)
             return None, rss_resp.message
         return rss_resp.global_id, None

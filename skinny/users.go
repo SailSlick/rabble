@@ -98,7 +98,7 @@ func (s *serverWrapper) handleLogin() http.HandlerFunc {
 			enc.Encode(jsonResp)
 			return
 		}
-		if resp.Result == pb.LoginResponse_ACCEPTED {
+		if resp.Result == pb.ResultType_OK {
 			session, err := s.store.Get(r, "rabble-session")
 			if err != nil {
 				log.Println(err)
@@ -115,7 +115,7 @@ func (s *serverWrapper) handleLogin() http.HandlerFunc {
 			session.Values["global_id"] = resp.GlobalId
 			session.Values["display_name"] = resp.DisplayName
 			session.Save(r, w)
-		} else if resp.Result == pb.LoginResponse_DENIED {
+		} else if resp.Result == pb.ResultType_ERROR_401 {
 			w.WriteHeader(http.StatusUnauthorized)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -259,7 +259,69 @@ func (s *serverWrapper) handleUserUpdate() http.HandlerFunc {
 			log.Printf("Could not update user: %v", err)
 			resp.Error = "Error communicating with user update service"
 			w.WriteHeader(http.StatusInternalServerError)
-		} else if updateResp.Result != pb.UpdateUserResponse_ACCEPTED {
+		} else if updateResp.Result != pb.ResultType_OK {
+			// Unlike in user response, we will be clear that they
+			// provided an incorrect password.
+			log.Printf("Error updating user: %s", resp.Error)
+			resp.Error = updateResp.Error
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			log.Print("Update session display_name if it changed")
+			resp.Success = true
+		}
+
+		enc.Encode(resp)
+	}
+}
+
+// handleUserUpdate sends an RPC to the users service to update a user with the
+// given info.
+func (s *serverWrapper) handleFeedUserVerification() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		decoder := json.NewDecoder(r.Body)
+		w.Header().Set("Content-Type", "application/json")
+
+		var (
+			req  pb.UpdateUserRequest
+			resp userResponse
+		)
+		resp.Success = false
+
+		enc := json.NewEncoder(w)
+
+		handle, err := s.getSessionHandle(r)
+		if err != nil {
+			log.Printf("Call to update user by not logged in user")
+			w.WriteHeader(http.StatusForbidden)
+			resp.Error = invalidJSONError
+			enc.Encode(resp)
+			return
+		}
+
+		err = decoder.Decode(&req)
+		if err != nil {
+			log.Printf(invalidJSONErrorWithPrint, err)
+			w.WriteHeader(http.StatusBadRequest)
+			resp.Error = invalidJSONError
+			enc.Encode(resp)
+			return
+		}
+
+		// This makes the handle optional to send, since it's already
+		// provided by the session handler.
+		req.Handle = handle
+
+		log.Printf("Trying to update user %#v.\n", req.Handle)
+		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeoutDuration)
+		defer cancel()
+
+		updateResp, err := s.users.Update(ctx, &req)
+
+		if err != nil {
+			log.Printf("Could not update user: %v", err)
+			resp.Error = "Error communicating with user update service"
+			w.WriteHeader(http.StatusInternalServerError)
+		} else if updateResp.Result != pb.ResultType_OK {
 			// Unlike in user response, we will be clear that they
 			// provided an incorrect password.
 			log.Printf("Error updating user: %s", resp.Error)

@@ -82,9 +82,9 @@ class ActivitiesUtil:
                 hostname = 'http://' + hostname
             else:
                 hostname = 'https://' + hostname
-            self._logger.info('Normalising hostname from "%s" to "%s".',
-                              old_hostname,
-                              hostname)
+            self._logger.debug('Normalising hostname from "%s" to "%s".',
+                               old_hostname,
+                               hostname)
         return hostname
 
     def _remove_protocol_from_host(self, host):

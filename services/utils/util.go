@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -261,4 +262,18 @@ func ConvertDBToUsers(ctx context.Context, p *pb.UsersResponse, db UsersGetter) 
 		ue = append(ue, StripUser(r))
 	}
 	return ue
+}
+
+// Creates a connction to GRPC server
+func GrpcConn(env string, port string) *grpc.ClientConn {
+	host := os.Getenv(env)
+	if host == "" {
+		log.Fatalf("%s env var not set.", env)
+	}
+	addr := host + ":" + port
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Server could not connect to %s: %v", addr, err)
+	}
+	return conn
 }

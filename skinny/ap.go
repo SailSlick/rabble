@@ -746,7 +746,7 @@ func (s *serverWrapper) handleDeleteActivity() http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "Issue with receiving delete activity.\n")
 			return
-		} else if resp.ResultType == pb.ResultType_DENIED {
+		} else if resp.ResultType == pb.ResultType_ERROR_401 {
 			log.Printf("Delete activity is denied")
 			w.WriteHeader(http.StatusUnauthorized)
 			fmt.Fprintf(w, "Delete activity is denied")

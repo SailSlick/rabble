@@ -10,6 +10,7 @@ import (
 	"time"
 
 	pb "github.com/cpssd/rabble/services/proto"
+	utils "github.com/cpssd/rabble/services/utils"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"google.golang.org/grpc"
@@ -115,111 +116,98 @@ func (s *serverWrapper) shutdown() {
 	s.approverConn.Close()
 }
 
-func grpcConn(env string, port string) *grpc.ClientConn {
-	host := os.Getenv(env)
-	if host == "" {
-		log.Fatalf("%s env var not set for skinny server.", env)
-	}
-	addr := host + ":" + port
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Skinny server did not connect to %s: %v", addr, err)
-	}
-	return conn
-}
-
 func createArticleClient() (*grpc.ClientConn, pb.ArticleClient) {
-	conn := grpcConn("ARTICLE_SERVICE_HOST", "1601")
+	conn := utils.GrpcConn("ARTICLE_SERVICE_HOST", "1601")
 	return conn, pb.NewArticleClient(conn)
 }
 
 func createCreateClient() (*grpc.ClientConn, pb.CreateClient) {
-	conn := grpcConn("CREATE_SERVICE_HOST", "1922")
+	conn := utils.GrpcConn("CREATE_SERVICE_HOST", "1922")
 	return conn, pb.NewCreateClient(conn)
 }
 
 func createUsersClient() (*grpc.ClientConn, pb.UsersClient) {
-	conn := grpcConn("USERS_SERVICE_HOST", "1534")
+	conn := utils.GrpcConn("USERS_SERVICE_HOST", "1534")
 	return conn, pb.NewUsersClient(conn)
 }
 
 func createDatabaseClient() (*grpc.ClientConn, pb.DatabaseClient) {
-	conn := grpcConn("DB_SERVICE_HOST", "1798")
+	conn := utils.GrpcConn("DB_SERVICE_HOST", "1798")
 	return conn, pb.NewDatabaseClient(conn)
 }
 
 func createFollowsClient() (*grpc.ClientConn, pb.FollowsClient) {
-	conn := grpcConn("FOLLOWS_SERVICE_HOST", "1641")
+	conn := utils.GrpcConn("FOLLOWS_SERVICE_HOST", "1641")
 	return conn, pb.NewFollowsClient(conn)
 }
 
 func createFeedClient() (*grpc.ClientConn, pb.FeedClient) {
-	conn := grpcConn("FEED_SERVICE_HOST", "2012")
+	conn := utils.GrpcConn("FEED_SERVICE_HOST", "2012")
 	return conn, pb.NewFeedClient(conn)
 }
 
 func createS2SFollowClient() (*grpc.ClientConn, pb.S2SFollowClient) {
-	conn := grpcConn("FOLLOW_ACTIVITY_SERVICE_HOST", "1922")
+	conn := utils.GrpcConn("FOLLOW_ACTIVITY_SERVICE_HOST", "1922")
 	return conn, pb.NewS2SFollowClient(conn)
 }
 
 func createApproverClient() (*grpc.ClientConn, pb.ApproverClient) {
-	conn := grpcConn("APPROVER_SERVICE_HOST", "2077")
+	conn := utils.GrpcConn("APPROVER_SERVICE_HOST", "2077")
 	return conn, pb.NewApproverClient(conn)
 }
 
 func createS2SLikeClient() (*grpc.ClientConn, pb.S2SLikeClient) {
-	conn := grpcConn("LIKE_SERVICE_HOST", "1848")
+	conn := utils.GrpcConn("LIKE_SERVICE_HOST", "1848")
 	return conn, pb.NewS2SLikeClient(conn)
 }
 
 func createS2SUndoClient() (*grpc.ClientConn, pb.S2SUndoClient) {
-	conn := grpcConn("UNDO_SERVICE_HOST", "1608")
+	conn := utils.GrpcConn("UNDO_SERVICE_HOST", "1608")
 	return conn, pb.NewS2SUndoClient(conn)
 }
 
 func createS2SUpdateClient() (*grpc.ClientConn, pb.S2SUpdateClient) {
-	conn := grpcConn("UPDATE_SERVICE_HOST", "2029")
+	conn := utils.GrpcConn("UPDATE_SERVICE_HOST", "2029")
 	return conn, pb.NewS2SUpdateClient(conn)
 }
 
 func createS2SDeleteClient() (*grpc.ClientConn, pb.S2SDeleteClient) {
-	conn := grpcConn("DELETE_SERVICE_HOST", "1997")
+	conn := utils.GrpcConn("DELETE_SERVICE_HOST", "1997")
 	return conn, pb.NewS2SDeleteClient(conn)
 }
 
 func createRSSClient() (*grpc.ClientConn, pb.RSSClient) {
-	conn := grpcConn("RSS_SERVICE_HOST", "1973")
+	conn := utils.GrpcConn("RSS_SERVICE_HOST", "1973")
 	return conn, pb.NewRSSClient(conn)
 }
 
 func createFollowRecommendationsClient() (*grpc.ClientConn, pb.FollowRecommendationsClient) {
-	conn := grpcConn("FOLLOW_RECOMMENDATIONS_HOST", "1973")
+	conn := utils.GrpcConn("FOLLOW_RECOMMENDATIONS_HOST", "1973")
 	return conn, pb.NewFollowRecommendationsClient(conn)
 }
 
 func createLDNormClient() (*grpc.ClientConn, pb.LDNormClient) {
-	conn := grpcConn("LDNORM_SERVICE_HOST", "1804")
+	conn := utils.GrpcConn("LDNORM_SERVICE_HOST", "1804")
 	return conn, pb.NewLDNormClient(conn)
 }
 
 func createActorsClient() (*grpc.ClientConn, pb.ActorsClient) {
-	conn := grpcConn("ACTORS_SERVICE_HOST", "1973")
+	conn := utils.GrpcConn("ACTORS_SERVICE_HOST", "1973")
 	return conn, pb.NewActorsClient(conn)
 }
 
 func createSearchClient() (*grpc.ClientConn, pb.SearchClient) {
-	conn := grpcConn("SEARCH_SERVICE_HOST", "1886")
+	conn := utils.GrpcConn("SEARCH_SERVICE_HOST", "1886")
 	return conn, pb.NewSearchClient(conn)
 }
 
 func createAnnounceClient() (*grpc.ClientConn, pb.AnnounceClient) {
-	conn := grpcConn("ANNOUNCE_SERVICE_HOST", "1919")
+	conn := utils.GrpcConn("ANNOUNCE_SERVICE_HOST", "1919")
 	return conn, pb.NewAnnounceClient(conn)
 }
 
 func createPostRecommendationsClient() (*grpc.ClientConn, pb.PostRecommendationsClient) {
-	conn := grpcConn("POST_RECOMMENDATIONS_SERVICE_HOST", "1814")
+	conn := utils.GrpcConn("POST_RECOMMENDATIONS_SERVICE_HOST", "1814")
 	return conn, pb.NewPostRecommendationsClient(conn)
 }
 
@@ -248,7 +236,6 @@ func buildServerWrapper() *serverWrapper {
 	}
 
 	generatedBlacklist := NewBlacklist(loadBlacklistFile())
-	log.Print(generatedBlacklist)
 
 	cookieStore := sessions.NewCookieStore([]byte("rabble_key"))
 	databaseConn, databaseClient := createDatabaseClient()

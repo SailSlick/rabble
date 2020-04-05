@@ -23,10 +23,10 @@ class LoginHandler:
 
         if err is not None:
             return users_pb2.LoginResponse(
-                result=general_pb2.ResultType.DENIED,
+                result=general_pb2.ResultType.ERROR_401,
             )
         return users_pb2.LoginResponse(
-            result=users_pb2.LoginResponse.ACCEPTED,
+            result=general_pb2.ResultType.OK,
             display_name=user.display_name,
             global_id=user.global_id,
         )

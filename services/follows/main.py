@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
 
@@ -18,17 +17,8 @@ from services.proto import rss_pb2_grpc
 from services.proto import approver_pb2_grpc
 
 
-def get_args():
-    parser = argparse.ArgumentParser('Run the Rabble following microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def main():
-    args = get_args()
-    logger = get_logger('follows_service', args.v)
+    logger = get_logger('follows_service')
     logger.info('Creating server')
 
     db_env = 'DB_SERVICE_HOST'

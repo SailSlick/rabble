@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
 
@@ -16,17 +15,8 @@ def get_db_stub(logger):
     return database_pb2_grpc.DatabaseStub(chan)
 
 
-def get_args():
-    parser = argparse.ArgumentParser('Run the Rabble users microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def main():
-    args = get_args()
-    logger = get_logger("users_service", args.v)
+    logger = get_logger("users_service")
     logger.info("Creating users server")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     users_pb2_grpc.add_UsersServicer_to_server(

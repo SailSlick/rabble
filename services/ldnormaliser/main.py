@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
 
@@ -9,18 +8,8 @@ from ldnormaliser.servicer import LDNormServicer
 from services.proto import ldnorm_pb2_grpc
 
 
-def get_args():
-    parser = argparse.ArgumentParser(
-        'Run the Rabble LD normaliser microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def main():
-    args = get_args()
-    logger = get_logger("ldnorm_service", args.v)
+    logger = get_logger("ldnorm_service")
     logger.info("Creating ldnorm server")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     ldnorm_pb2_grpc.add_LDNormServicer_to_server(

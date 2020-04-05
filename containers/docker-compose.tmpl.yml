@@ -188,6 +188,8 @@ services:
     networks:
       - [[NETWORK_NAME]]
       - default
+    environment:
+      - LOG_LEVEL=[[LOG_LEVEL]]
   article_service_[[INSTANCE_ID]]:
     build:
       context: ./services/article

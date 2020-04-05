@@ -26,12 +26,6 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  enum ResultType {
-    ACCEPTED = 0;
-    DENIED   = 1;
-    ERROR    = 2;
-  }
-
   ResultType result = 1;
   string error = 2;
   // These fields are set if the result is ACCEPTED
@@ -52,12 +46,6 @@ message UpdateUserRequest {
 }
 
 message UpdateUserResponse {
-  enum ResultType {
-    ACCEPTED = 0;
-    DENIED   = 1;
-    ERROR    = 2;
-  }
-
   ResultType result = 1;
   string error = 2;
   // This fields are set if the result is ACCEPTED

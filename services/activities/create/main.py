@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 from concurrent import futures
-import argparse
 import grpc
 import time
-import os
-import sys
 
 from utils.connect import get_service_channel, get_future_channel
 from utils.logger import get_logger
@@ -16,17 +13,8 @@ from services.proto import article_pb2_grpc
 from utils.activities import ActivitiesUtil
 
 
-def get_args():
-    parser = argparse.ArgumentParser('Run the rabble create microservice')
-    parser.add_argument(
-        '-v', default='WARNING', action='store_const', const='DEBUG',
-        help='Log more verbosely.')
-    return parser.parse_args()
-
-
 def main():
-    args = get_args()
-    logger = get_logger("create_service", args.v)
+    logger = get_logger("create_service")
 
     db_channel = get_service_channel(logger, "DB_SERVICE_HOST", 1798)
     db_stub = database_pb2_grpc.DatabaseStub(db_channel)

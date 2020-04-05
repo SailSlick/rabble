@@ -28,7 +28,7 @@ class SendDeleteServicer:
         if article.author_id != req.user_id:
             self._logger.error("User requesting article deletion isn't author")
             return general_pb2.GeneralResponse(
-                result_type=general_pb2.ResultType.DENIED,
+                result_type=general_pb2.ResultType.ERROR_401,
                 error="User is not the author of this article",
             )
         sharer_ids = get_sharers_of_article(
