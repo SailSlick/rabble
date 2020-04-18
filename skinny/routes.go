@@ -61,7 +61,7 @@ func (s *serverWrapper) setupRoutes() {
 	r.HandleFunc("/c2s/@{username}/followers", s.handleGetFollowers())
 	r.HandleFunc("/c2s/@{username}/following", s.handleGetFollowing())
 	r.HandleFunc("/c2s/@{username}/details", s.handleUserDetails())
-	r.HandleFunc("/c2s/@{username}/verify_feed", s.handleFeedUserVerification())
+	r.HandleFunc("/c2s/update/user_feed", s.handleUserFeedUpdate())
 	r.HandleFunc("/c2s/update/user", s.handleUserUpdate())
 	r.HandleFunc("/c2s/update/user_pic", s.handleUserUpdateProfilePic())
 	r.HandleFunc("/c2s/{userId}/recommend_follows",

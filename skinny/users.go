@@ -20,6 +20,8 @@ import (
 
 const (
 	couldNotLoadProfilePic = "Could not load profile pic from request"
+	notAllParamsProvided = "Not all required parameters were provided"
+	invalidRequestError = "Invalid request"
 )
 
 type loginStruct struct {
@@ -219,10 +221,8 @@ func (s *serverWrapper) handleUserUpdate() http.HandlerFunc {
 		decoder := json.NewDecoder(r.Body)
 		w.Header().Set("Content-Type", "application/json")
 
-		var (
-			req  pb.UpdateUserRequest
-			resp userResponse
-		)
+		var req pb.UpdateUserRequest
+		var resp userResponse
 		resp.Success = false
 
 		enc := json.NewEncoder(w)
@@ -231,7 +231,7 @@ func (s *serverWrapper) handleUserUpdate() http.HandlerFunc {
 		if err != nil {
 			log.Printf("Call to update user by not logged in user")
 			w.WriteHeader(http.StatusForbidden)
-			resp.Error = invalidJSONError
+			resp.Error = loginRequired
 			enc.Encode(resp)
 			return
 		}
@@ -274,30 +274,27 @@ func (s *serverWrapper) handleUserUpdate() http.HandlerFunc {
 	}
 }
 
-// handleUserUpdate sends an RPC to the users service to update a user with the
-// given info.
-func (s *serverWrapper) handleFeedUserVerification() http.HandlerFunc {
+// handleUserFeedUpdate allows people to add an RSS feed to get content from
+// This sends an RPC to the rss service to update a user with the given info.
+func (s *serverWrapper) handleUserFeedUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		w.Header().Set("Content-Type", "application/json")
 
-		var (
-			req  pb.UpdateUserRequest
-			resp userResponse
-		)
-		resp.Success = false
-
+		var req pb.FeedVerifyEntry
+		var resp pb.UpdateUserFeedResponse
 		enc := json.NewEncoder(w)
 
-		handle, err := s.getSessionHandle(r)
+		globalID, err := s.getSessionGlobalID(r)
 		if err != nil {
-			log.Printf("Call to update user by not logged in user")
+			log.Printf("Call to update user feed by not logged in user")
 			w.WriteHeader(http.StatusForbidden)
-			resp.Error = invalidJSONError
+			resp.Error = loginRequired
 			enc.Encode(resp)
 			return
 		}
 
+		// User provides the FeedUrl, `feed_url`.
 		err = decoder.Decode(&req)
 		if err != nil {
 			log.Printf(invalidJSONErrorWithPrint, err)
@@ -305,31 +302,33 @@ func (s *serverWrapper) handleFeedUserVerification() http.HandlerFunc {
 			resp.Error = invalidJSONError
 			enc.Encode(resp)
 			return
+		} else if req.FeedUrl == "" {
+			log.Println(notAllParamsProvided)
+			w.WriteHeader(http.StatusBadRequest)
+			resp.Error = notAllParamsProvided
+			enc.Encode(resp)
+			return
 		}
 
-		// This makes the handle optional to send, since it's already
-		// provided by the session handler.
-		req.Handle = handle
-
-		log.Printf("Trying to update user %#v.\n", req.Handle)
-		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeoutDuration)
+		req.UserId = globalID
+		log.Printf("Trying to update user %#v feed.\n", globalID)
+		ctx, cancel := context.WithTimeout(context.Background(),
+																			defaultTimeoutDuration)
 		defer cancel()
 
-		updateResp, err := s.users.Update(ctx, &req)
-
+		uResp, err := s.rss.UpdateUserFeed(ctx, &req)
+		resp = *uResp
 		if err != nil {
-			log.Printf("Could not update user: %v", err)
-			resp.Error = "Error communicating with user update service"
+			log.Printf("Could not update user feed: %v", err)
+			resp.Error = "Error communicating with rss service"
 			w.WriteHeader(http.StatusInternalServerError)
-		} else if updateResp.Result != pb.ResultType_OK {
-			// Unlike in user response, we will be clear that they
-			// provided an incorrect password.
-			log.Printf("Error updating user: %s", resp.Error)
-			resp.Error = updateResp.Error
+		} else if resp.ResultType == pb.ResultType_ERROR {
+			log.Printf("Error updating user feed: %s", resp.Error)
 			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			log.Print("Update session display_name if it changed")
-			resp.Success = true
+		} else if resp.ResultType == pb.ResultType_ERROR_400 {
+			log.Printf("Error updating user feed: %s", resp.Error)
+			w.WriteHeader(http.StatusBadRequest)
+			resp.Error = invalidRequestError
 		}
 
 		enc.Encode(resp)
@@ -463,7 +462,7 @@ func (s *serverWrapper) handleUserDetails() http.HandlerFunc {
 		}
 
 		ur := &pb.UsersRequest{
-			RequestType: pb.UsersRequest_FIND,
+			RequestType: pb.RequestType_FIND,
 			Match: &pb.UsersEntry{
 				Handle:     handle,
 				Host:       util.NormaliseHost(host),

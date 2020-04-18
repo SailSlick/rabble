@@ -11,6 +11,7 @@ import (
 
 	pb "github.com/cpssd/rabble/services/proto"
 	"github.com/golang/protobuf/ptypes"
+	// gpb "google.golang.org/protobuf/proto"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/grpc"
 )
@@ -69,6 +70,25 @@ func ParseUsername(fqu string) (string, string, error) {
 
 	return split[0], host, nil
 }
+//
+// func GeneralExternalErrorHandler(msg gpb.Message, err error, resp gpb.Message, w http.ResponseWriter) (gpb.Message) {
+// 	if err != nil {
+// 		log.Printf("Got error: %v", err)
+// 		resp.Error = "Error communicating with rss service"
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return resp
+// 	} else if resp.ResultType == pb.ResultType_ERROR {
+// 		log.Printf("Error updating user feed: %s", resp.Error)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return resp
+// 	} else if resp.ResultType == pb.ResultType_ERROR_400 {
+// 		log.Printf("Error updating user feed: %s", resp.Error)
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		resp.Error = invalidRequestError
+// 		return resp
+// 	}
+// 	return nil
+// }
 
 // NormaliseHost takes a hostname like "jimjim.dev" and it returns
 // https://jimjim.dev.
@@ -115,7 +135,6 @@ type UsersGetter interface {
 }
 
 func GetAuthorFromDb(ctx context.Context, handle string, host string, hostIsNull bool, globalId int64, db UsersGetter) (*pb.UsersEntry, error) {
-	const errFmt = "Could not find user %v@%v. error: %v"
 	r := &pb.UsersRequest{
 		RequestType: pb.RequestType_FIND,
 		Match: &pb.UsersEntry{
@@ -125,24 +144,36 @@ func GetAuthorFromDb(ctx context.Context, handle string, host string, hostIsNull
 			GlobalId:   globalId,
 		},
 	}
+	return UserFindOne(ctx, r, db)
+}
 
-	resp, err := db.Users(ctx, r)
+func UserFindOne(ctx context.Context, ufr *pb.UsersRequest, db UsersGetter) (*pb.UsersEntry, error) {
+	results, err := UserFind(ctx, ufr, db)
 	if err != nil {
-		return nil, fmt.Errorf(errFmt, handle, host, err)
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, UserNotFoundErr
+	} else if len(results) > 1 {
+		return nil, fmt.Errorf("Expected 1 user for GetAuthorFromDb request, got %d",
+			len(results))
+	}
+	return results[0], nil
+}
+
+func UserFind(ctx context.Context, ufr *pb.UsersRequest, db UsersGetter) ([]*pb.UsersEntry, error) {
+	const errFmt = "Could not find user %v@%v. error: %v"
+
+	resp, err := db.Users(ctx, ufr)
+	if err != nil {
+		return nil, fmt.Errorf(errFmt, ufr.Match.Handle, ufr.Match.Host, err)
 	}
 
 	if resp.ResultType != pb.ResultType_OK {
-		return nil, fmt.Errorf(errFmt, handle, host, resp.Error)
+		return nil, fmt.Errorf(errFmt, ufr.Match.Handle, ufr.Match.Host, resp.Error)
 	}
-
-	if len(resp.Results) == 0 {
-		return nil, UserNotFoundErr
-	} else if len(resp.Results) > 1 {
-		log.Printf("Expected 1 user for GetAuthorFromDb request, got %d",
-			len(resp.Results))
-	}
-
-	return resp.Results[0], nil
+	return resp.Results, nil
 }
 
 // convertDBToFeed converts PostsResponses to PostsEntry[]

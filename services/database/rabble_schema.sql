@@ -110,7 +110,8 @@ CREATE TABLE IF NOT EXISTS shares (
 */
 CREATE TABLE IF NOT EXISTS feed_verification (
   feed_id           integer PRIMARY KEY AUTOINCREMENT,
-  feed_url          string NOT NULL,
+  feed_url          string  NOT NULL,
   user_id           integer NOT NULL,
   unclaimed_user_id integer NOT NULL,
+  register_datetime integer NOT NULL,
 );

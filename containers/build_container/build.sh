@@ -112,6 +112,9 @@ rm /go/bin/*
 go install github.com/cpssd/rabble/...
 mv /go/bin/* build_out
 
+echo "Cleaning up go protos"
+rm services/proto/*.pb.go
+
 echo "Installing node.js dependencies"
 cd chump && npm install && cd ..
 

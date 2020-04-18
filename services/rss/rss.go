@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
@@ -28,6 +29,7 @@ const (
 	rssTimeParseFormat    = "Mon, 02 Jan 2006 15:04:05 -0700"
 	rssDeclare            = `<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel>`
 	rssDeclareEnd         = `</channel></rss>`
+	letterBytes           = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
 
 type Parser interface {
@@ -53,12 +55,24 @@ func (s *serverWrapper) convertFeedItemDatetime(gi *gofeed.Item) (*tspb.Timestam
 		parsedTimestamp = *gi.PublishedParsed
 	}
 
-	protoTimestamp, protoTimeErr := ptypes.TimestampProto(parsedTimestamp)
+	return s.convertToProtoTimestamp(parsedTimestamp)
+}
+
+func (s *serverWrapper) convertToProtoTimestamp(timestamp time.Time) (*tspb.Timestamp, error) {
+	protoTimestamp, protoTimeErr := ptypes.TimestampProto(timestamp)
 	if protoTimeErr != nil {
 		log.Printf("Error converting timestamp: %s\n", protoTimeErr)
 		return nil, fmt.Errorf("Invalid timestamp")
 	}
 	return protoTimestamp, nil
+}
+
+func (s *serverWrapper) generateVerifyHash(n int) string {
+	b := make([]byte, n)
+  for i := range b {
+      b[i] = letterBytes[rand.Intn(len(letterBytes))]
+  }
+  return string(b)
 }
 
 func (s *serverWrapper) convertRssURLToHandle(url string) string {
@@ -131,20 +145,7 @@ func (s *serverWrapper) GetUser(ctx context.Context, globalID int64) (*pb.UsersE
 			GlobalId: globalID,
 		},
 	}
-	findResp, findErr := s.db.Users(ctx, urFind)
-	if findErr != nil {
-		return nil, fmt.Errorf(findUserErrorFmt, globalID, findErr)
-	}
-	if findResp.ResultType != pb.ResultType_OK {
-		return nil, fmt.Errorf(findUserErrorFmt, globalID, findResp.Error)
-	}
-	if len(findResp.Results) < 1 {
-		return nil, fmt.Errorf("No users in db with id: %v", globalID)
-	}
-	if len(findResp.Results) > 1 {
-		return nil, fmt.Errorf("Multiple users with id: %v in db", globalID)
-	}
-	return findResp.Results[0], nil
+	return utils.UserFindOne(ctx, urFind, s.db)
 }
 
 func (s *serverWrapper) GetUserPosts(ctx context.Context, authorID int64) ([]*pb.PostsEntry, error) {
@@ -172,6 +173,55 @@ func (s *serverWrapper) GetRssFeed(url string) (*gofeed.Feed, error) {
 	}
 
 	return feed, nil
+}
+
+func (s *serverWrapper) UpdateUserFeed(ctx context.Context, r *pb.FeedVerifyEntry) (*pb.UpdateUserFeedResponse, error) {
+	log.Printf("UpdateUserFeed for userId: %s, feed: %s \n", r.UserId, r.FeedUrl)
+	uufr := &pb.UpdateUserFeedResponse{}
+
+	// Check if rss feed user already exists.
+	urFind := &pb.UsersRequest {
+		RequestType: pb.RequestType_FIND,
+		Match: &pb.UsersEntry{ Rss: r.FeedUrl },
+	}
+	rssUsers, rssErr := utils.UserFind(ctx, urFind, s.db)
+	if rssErr != nil {
+		log.Printf("UpdateUserFeed rss find got: %v\n", rssErr.Error())
+		uufr.ResultType = pb.ResultType_ERROR
+		uufr.Error = rssErr.Error()
+		return uufr, nil
+	}
+	if len(rssUsers) != 0 {
+		// User with this feed already exists.
+		r.UnclaimedUserId = rssUsers[0].GlobalId
+	}
+
+	timestamp, _ := s.convertToProtoTimestamp(time.Now())
+	verifyHash := s.generateVerifyHash(20)
+	r.RegisterDatetime = timestamp
+	r.VerificationHash = verifyHash
+	// add new user with feed details
+	urInsert := &pb.FeedVerifyRequest{
+		RequestType: pb.RequestType_INSERT,
+		Entry: r,
+	}
+	insertResp, insertErr := s.db.FeedVerify(ctx, urInsert)
+
+	if insertErr != nil {
+		log.Printf("Error on feed verify insert: %v\n", insertErr)
+		uufr.ResultType = pb.ResultType_ERROR
+		uufr.Error = insertErr.Error()
+		return uufr, nil
+	} else if insertResp.ResultType != pb.ResultType_OK {
+		log.Printf("Feed verify insert failed. message: %v\n", insertResp.Error)
+		uufr.ResultType = insertResp.ResultType
+		uufr.Error = insertResp.Error
+		return uufr, nil
+	}
+
+	uufr.ResultType = pb.ResultType_OK
+	uufr.VerificationHash = verifyHash
+	return uufr, nil
 }
 
 func (s *serverWrapper) PerUserRss(ctx context.Context, r *pb.UsersEntry) (*pb.RssResponse, error) {
@@ -321,6 +371,7 @@ func main() {
 		}
 	}()
 
+	rand.Seed(time.Now().UnixNano())
 	scraperTicker := time.NewTicker(scraperInterval)
 
 	for t := range scraperTicker.C {

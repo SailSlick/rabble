@@ -318,6 +318,8 @@ message FeedVerifyEntry {
   int64 unclaimed_user_id = 4;
   // Code to be entered into feed to verify ownership
   string verification_hash = 5;
+  // Timestamp the feed was registered at
+  google.protobuf.Timestamp register_datetime = 6;
 }
 
 message FeedVerifyRequest {

@@ -147,7 +147,7 @@ func (s *serverWrapper) handleRssFollow() http.HandlerFunc {
 		if err != nil {
 			log.Printf("Call to follow rss by not logged in user")
 			w.WriteHeader(http.StatusForbidden)
-			errResp.Error = invalidJSONError
+			errResp.Error = loginRequired
 			enc.Encode(errResp)
 			return
 		}

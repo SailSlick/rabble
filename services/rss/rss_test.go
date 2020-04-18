@@ -228,7 +228,7 @@ func TestNewRssFollow(t *testing.T) {
 		t.Fatalf("NewRssFollow(%v), unexpected error: %v", req.RssUrl, err)
 	}
 
-	if r.ResultType != pb.ResultType_ACCEPTED {
+	if r.ResultType != pb.ResultType_OK {
 		t.Fatalf("NewRssFollow(%v), received non accept result_type: %v", req.RssUrl, r.ResultType)
 	}
 }
