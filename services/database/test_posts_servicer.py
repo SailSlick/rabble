@@ -43,7 +43,7 @@ class PostsDatabaseHelper(unittest.TestCase):
         )
 
         req = database_pb2.PostsRequest(
-            request_type=database_pb2.PostsRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=post_entry,
         )
 
@@ -70,7 +70,7 @@ class PostsDatabaseHelper(unittest.TestCase):
             state=state,
         )
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=entry,
         )
         res = self.follow.Follow(req, self.ctx)
@@ -86,7 +86,7 @@ class PostsDatabaseHelper(unittest.TestCase):
         )
 
         req = database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=user_entry,
         )
         add_res = self.users.Users(req, self.ctx)
@@ -104,7 +104,7 @@ class PostsDatabaseHelper(unittest.TestCase):
 
     def find_post(self, user, author_id=None):
         req = database_pb2.PostsRequest(
-            request_type=database_pb2.PostsRequest.FIND
+            request_type=database_pb2.RequestType.FIND
         )
         if author_id is not None:
             req.match.author_id = author_id

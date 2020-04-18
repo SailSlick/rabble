@@ -20,7 +20,7 @@ const (
 
 func (s *serverWrapper) getAllRssUsers(ctx context.Context) ([]*pb.UsersEntry, error) {
 	urFind := &pb.UsersRequest{
-		RequestType: pb.UsersRequest_FIND_NOT,
+		RequestType: pb.RequestType_FIND_NOT,
 		Match: &pb.UsersEntry{
 			Rss: "unused",
 		},

@@ -25,11 +25,11 @@ class UsersDatabaseServicer:
             "f.followed=u.global_id AND f.follower=? "
         )
         self._users_type_handlers = {
-            database_pb2.UsersRequest.INSERT: self._users_handle_insert,
-            database_pb2.UsersRequest.FIND: self._users_handle_find,
-            database_pb2.UsersRequest.FIND_NOT: self._users_handle_find_not,
-            database_pb2.UsersRequest.UPDATE: self._users_handle_update,
-            database_pb2.UsersRequest.DELETE: self._users_handle_delete,
+            database_pb2.RequestType.INSERT: self._users_handle_insert,
+            database_pb2.RequestType.FIND: self._users_handle_find,
+            database_pb2.RequestType.FIND_NOT: self._users_handle_find_not,
+            database_pb2.RequestType.UPDATE: self._users_handle_update,
+            database_pb2.RequestType.DELETE: self._users_handle_delete,
         }
         self._filter_defer = {
             'private': self._private_to_filter,

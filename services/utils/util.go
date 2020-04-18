@@ -117,7 +117,7 @@ type UsersGetter interface {
 func GetAuthorFromDb(ctx context.Context, handle string, host string, hostIsNull bool, globalId int64, db UsersGetter) (*pb.UsersEntry, error) {
 	const errFmt = "Could not find user %v@%v. error: %v"
 	r := &pb.UsersRequest{
-		RequestType: pb.UsersRequest_FIND,
+		RequestType: pb.RequestType_FIND,
 		Match: &pb.UsersEntry{
 			Handle:     handle,
 			Host:       host,

@@ -17,7 +17,7 @@ class SendLikeUndoServicer:
 
     def _get_article(self, article_id):
         posts_req = dbpb.PostsRequest(
-            request_type=dbpb.PostsRequest.FIND,
+            request_type=dbpb.RequestType.FIND,
             match=dbpb.PostsEntry(
                 global_id=article_id,
             ),

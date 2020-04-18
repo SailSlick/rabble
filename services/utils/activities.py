@@ -99,7 +99,7 @@ class ActivitiesUtil:
         be retrieved, return None.
         """
         user_resp = self._db.Users(database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=database_pb2.UsersEntry(global_id=_id)))
         if user_resp.result_type != general_pb2.ResultType.OK:
             self._logger.warning(
@@ -291,7 +291,7 @@ class ActivitiesUtil:
 
     def get_article_by_ap_id(self, obj_id):
         posts_req = database_pb2.PostsRequest(
-            request_type=database_pb2.PostsRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=database_pb2.PostsEntry(
                 ap_id=obj_id,
             ),
@@ -319,7 +319,7 @@ class ActivitiesUtil:
         """
         self._logger.info("Sending activity to followers")
         resp = self._db.Follow(database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=database_pb2.Follow(followed=user_id),
         ))
         if resp.result_type != general_pb2.ResultType.OK:
@@ -329,7 +329,7 @@ class ActivitiesUtil:
         hosts_to_users = {}
         for follow in resp.results:
             user_resp = self._db.Users(database_pb2.UsersRequest(
-                request_type=database_pb2.UsersRequest.FIND,
+                request_type=database_pb2.RequestType.FIND,
                 match=database_pb2.UsersEntry(global_id=follow.follower)))
             if user_resp.result_type != general_pb2.ResultType.OK:
                 self._logger.warning(

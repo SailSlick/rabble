@@ -50,7 +50,7 @@ type DBMock struct {
 }
 
 func (m *DBMock) Posts(_ context.Context, in *pb.PostsRequest, opts ...grpc.CallOption) (*pb.PostsResponse, error) {
-	if in.RequestType != pb.PostsRequest_FIND {
+	if in.RequestType != pb.RequestType_FIND {
 		return nil, fmt.Errorf("DBMock: should only use a FIND Request")
 	}
 
@@ -63,7 +63,7 @@ func (m *DBMock) Posts(_ context.Context, in *pb.PostsRequest, opts ...grpc.Call
 }
 
 func (m *DBMock) Users(_ context.Context, in *pb.UsersRequest, opts ...grpc.CallOption) (*pb.UsersResponse, error) {
-	if in.RequestType != pb.UsersRequest_FIND {
+	if in.RequestType != pb.RequestType_FIND {
 		return nil, fmt.Errorf("DBMock: should only use a FIND Request")
 	}
 

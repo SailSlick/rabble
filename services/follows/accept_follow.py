@@ -40,7 +40,7 @@ class AcceptFollowServicer:
                                     state=database_pb2.Follow.PENDING)
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=match,
         )
 
@@ -65,7 +65,7 @@ class AcceptFollowServicer:
                                     state=database_pb2.Follow.PENDING)
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.UPDATE,
+            request_type=database_pb2.RequestType.UPDATE,
             match=match,
             entry=entry,
         )

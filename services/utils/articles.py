@@ -22,7 +22,7 @@ def get_article(logger, db, global_id=None, ap_id=None):
     """
     logger.info("Getting article global_id: %s, ap_id: %s", global_id, ap_id)
     resp = db.Posts(database_pb2.PostsRequest(
-        request_type=database_pb2.PostsRequest.FIND,
+        request_type=database_pb2.RequestType.FIND,
         match=database_pb2.PostsEntry(
             global_id=global_id,
             ap_id=ap_id,

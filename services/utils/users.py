@@ -97,7 +97,7 @@ class UsersUtil:
         self._logger.debug('Creating user %s@%s in database',
                            entry.handle, entry.host)
         insert_req = database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=entry
         )
         insert_resp = self._db.Users(insert_req)
@@ -110,7 +110,7 @@ class UsersUtil:
     def delete_user_from_db(self, global_id):
         self._logger.debug("Deleteing user with global_id %d", global_id)
         resp = self._db.Users(database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.DELETE,
+            request_type=database_pb2.RequestType.DELETE,
             entry=database_pb2.UsersEntry(
                 global_id=global_id
             ),
@@ -180,7 +180,7 @@ class UsersUtil:
             global_id=global_id
         )
         find_req = database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=user_entry
         )
         find_resp = self._db.Users(find_req)
@@ -203,7 +203,7 @@ class UsersUtil:
             followed=user_id
         )
         follow_req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)

@@ -23,7 +23,7 @@ class SurpriseRecommender:
 
     def _load_data(self):
         follow_req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=None)
         follow_resp = self._db.Follow(follow_req)
         if follow_resp.result_type == general_pb2.ResultType.ERROR:

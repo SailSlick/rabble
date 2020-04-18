@@ -22,7 +22,7 @@ class ActorsServicer:
         )
         req = database_pb2.UsersRequest(
             match=user,
-            request_type=database_pb2.UsersRequest.FIND
+            request_type=database_pb2.RequestType.FIND
         )
         resp = self._db_stub.Users(req)
         if (resp.result_type != general_pb2.ResultType.OK or

@@ -12,7 +12,7 @@ class GetCssHandler:
         self._logger.info("Request to get the CSS for user id %s",
                           request.user_id)
         resp = self._db.Users(database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=database_pb2.UsersEntry(
                 global_id=request.user_id,
             )

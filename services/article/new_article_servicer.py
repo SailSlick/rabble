@@ -55,7 +55,7 @@ class NewArticleServicer:
             summary=req.summary,
         )
         pr = database_pb2.PostsRequest(
-            request_type=database_pb2.PostsRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=pe
         )
         posts_resp = self._db_stub.Posts(pr)

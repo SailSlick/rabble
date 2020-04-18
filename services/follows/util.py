@@ -22,7 +22,7 @@ class Util:
             state=state,
         )
         follow_req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)
@@ -39,7 +39,7 @@ class Util:
             followed=followed_id,
         )
         follow_req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.DELETE,
+            request_type=database_pb2.RequestType.DELETE,
             match=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)
@@ -57,7 +57,7 @@ class Util:
             followed=followed_id
         )
         follow_req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=follow_entry
         )
         follow_resp = self._db.Follow(follow_req)

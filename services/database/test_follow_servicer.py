@@ -37,7 +37,7 @@ class FollowDatabaseHelper(unittest.TestCase):
         )
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=follow_entry,
         )
 
@@ -54,7 +54,7 @@ class FollowDatabaseHelper(unittest.TestCase):
         )
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=follow_entry,
         )
 
@@ -72,7 +72,7 @@ class FollowDatabaseHelper(unittest.TestCase):
         )
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.UPDATE,
+            request_type=database_pb2.RequestType.UPDATE,
             match=match,
             entry=entry
         )
@@ -89,7 +89,7 @@ class FollowDatabaseHelper(unittest.TestCase):
         )
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.DELETE,
+            request_type=database_pb2.RequestType.DELETE,
             match=match,
         )
 
@@ -195,7 +195,7 @@ class TestUpdateDatabase(FollowDatabaseHelper):
         match = database_pb2.Follow(follower=8, followed=9)
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.UPDATE,
+            request_type=database_pb2.RequestType.UPDATE,
             match=match,
         )
         follow_res = self.service.Follow(req, self.ctx)
@@ -210,7 +210,7 @@ class TestUpdateDatabase(FollowDatabaseHelper):
         )
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.UPDATE,
+            request_type=database_pb2.RequestType.UPDATE,
             entry=entry,
         )
         follow_res = self.service.Follow(req, self.ctx)
@@ -228,7 +228,7 @@ class TestUpdateDatabase(FollowDatabaseHelper):
         match = database_pb2.Follow(follower=20)
         entry = database_pb2.Follow(state=database_pb2.Follow.ACTIVE)
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.UPDATE,
+            request_type=database_pb2.RequestType.UPDATE,
             entry=entry,
             match=match,
         )

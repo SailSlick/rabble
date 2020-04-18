@@ -39,7 +39,7 @@ class SendFollowServicer:
 
     def _get_local_user_id(self, handle):
         user = database_pb2.UsersEntry(handle=handle, host_is_null=True)
-        req = database_pb2.UsersRequest(request_type=database_pb2.UsersRequest.FIND,
+        req = database_pb2.UsersRequest(request_type=database_pb2.RequestType.FIND,
                                         match=user)
         resp = self._db.Users(req)
         if resp.result_type != general_pb2.ResultType.OK:

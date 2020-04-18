@@ -95,7 +95,7 @@ func (s *Server) addToIndex(b *pb.Post) error {
 
 func (s *Server) initIndex() {
 	req := &pb.PostsRequest{
-		RequestType: pb.PostsRequest_FIND,
+		RequestType: pb.RequestType_FIND,
 	}
 
 	ctx := context.Background()

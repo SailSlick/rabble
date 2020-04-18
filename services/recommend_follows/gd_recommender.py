@@ -49,7 +49,7 @@ class GraphDistanceRecommender:
         if inverse:
             follow = database_pb2.Follow(followed=uid)
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             entry=follow
         )
         resp = self._db.Follow(req)

@@ -37,7 +37,7 @@ def get_user_and_check_pw(logger, db_stub, handle, pw):
         logger.warning(err)
         raise ValueError(err)
     find_request = database_pb2.UsersRequest(
-        request_type=database_pb2.UsersRequest.FIND,
+        request_type=database_pb2.RequestType.FIND,
         match=database_pb2.UsersEntry(
             handle=handle,
             host_is_null=True,

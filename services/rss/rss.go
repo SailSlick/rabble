@@ -48,7 +48,8 @@ type serverWrapper struct {
 func (s *serverWrapper) convertFeedItemDatetime(gi *gofeed.Item) (*tspb.Timestamp, error) {
 	parsedTimestamp := time.Now()
 	if (gi.PublishedParsed != &time.Time{} && gi.PublishedParsed != nil) {
-		log.Printf("No timestamp for feed: %s\n", gi.Link)
+		// TODO (sailsick): Add log levels for golang
+		//log.Printf("No timestamp for feed: %s\n", gi.Link)
 		parsedTimestamp = *gi.PublishedParsed
 	}
 
@@ -125,7 +126,7 @@ func (s *serverWrapper) createRssItem(ue *pb.UsersEntry, pe *pb.PostsEntry) stri
 
 func (s *serverWrapper) GetUser(ctx context.Context, globalID int64) (*pb.UsersEntry, error) {
 	urFind := &pb.UsersRequest{
-		RequestType: pb.UsersRequest_FIND,
+		RequestType: pb.RequestType_FIND,
 		Match: &pb.UsersEntry{
 			GlobalId: globalID,
 		},
@@ -148,7 +149,7 @@ func (s *serverWrapper) GetUser(ctx context.Context, globalID int64) (*pb.UsersE
 
 func (s *serverWrapper) GetUserPosts(ctx context.Context, authorID int64) ([]*pb.PostsEntry, error) {
 	findReq := &pb.PostsRequest{
-		RequestType: pb.PostsRequest_FIND,
+		RequestType: pb.RequestType_FIND,
 		Match: &pb.PostsEntry{
 			AuthorId: authorID,
 		},
@@ -246,7 +247,7 @@ func (s *serverWrapper) NewRssFollow(ctx context.Context, r *pb.NewRssFeed) (*pb
 	bio := "RSS/Atom feed from " + handle + " converted to a Rabble user"
 	// add new user with feed details
 	urInsert := &pb.UsersRequest{
-		RequestType: pb.UsersRequest_INSERT,
+		RequestType: pb.RequestType_INSERT,
 		Entry: &pb.UsersEntry{
 			Handle:     handle,
 			Rss:        r.RssUrl,

@@ -16,7 +16,7 @@ class SendUpdateServicer:
         self._logger.info("Sending update request to DB")
         html_body = md_to_html(self._md, req.body)
         resp = self._db.Posts(dbpb.PostsRequest(
-            request_type=dbpb.PostsRequest.UPDATE,
+            request_type=dbpb.RequestType.UPDATE,
             match=dbpb.PostsEntry(global_id=article.global_id),
             entry=dbpb.PostsEntry(
                 title=req.title,

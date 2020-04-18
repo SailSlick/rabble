@@ -17,7 +17,7 @@ class ReceiveUpdateServicer:
         self._logger.info("Received edit for article '%s'", req.title)
         html_body = md_to_html(self._md, req.body)
         resp = self._db.Posts(dbpb.PostsRequest(
-            request_type=dbpb.PostsRequest.UPDATE,
+            request_type=dbpb.RequestType.UPDATE,
             match=dbpb.PostsEntry(ap_id=req.ap_id),
             entry=dbpb.PostsEntry(
                 title=req.title,

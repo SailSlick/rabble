@@ -31,7 +31,7 @@ class SendUnfollowServicer:
                                     followed=followed_id)
 
         req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.DELETE,
+            request_type=database_pb2.RequestType.DELETE,
             match=match
         )
 

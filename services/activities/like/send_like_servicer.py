@@ -24,7 +24,7 @@ class SendLikeServicer:
 
     def _get_article(self, article_id):
         req = database_pb2.PostsRequest(
-            request_type=database_pb2.PostsRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=database_pb2.PostsEntry(
                 global_id=article_id,
             ),

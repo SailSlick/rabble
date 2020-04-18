@@ -43,7 +43,7 @@ class UsersDatabaseHelper(unittest.TestCase):
         )
 
         req = database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=user_entry,
         )
         add_res = self.users.Users(req, self.ctx)

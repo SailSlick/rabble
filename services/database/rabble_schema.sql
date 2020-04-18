@@ -101,4 +101,16 @@ CREATE TABLE IF NOT EXISTS shares (
   PRIMARY KEY (user_id, article_id)
 );
 
-/* Add other tables here */
+/*
+  feed_id integer primary key for the table
+  feed_url full url for the rss feed (without protocol)
+  user_id global_id of the user requesting the change if user request
+  temp_pw hash of temporary password generated for feed claims
+  unclaimed_user_id global_id of the feed user if feed exists
+*/
+CREATE TABLE IF NOT EXISTS feed_verification (
+  feed_id           integer PRIMARY KEY AUTOINCREMENT,
+  feed_url          string NOT NULL,
+  user_id           integer NOT NULL,
+  unclaimed_user_id integer NOT NULL,
+);

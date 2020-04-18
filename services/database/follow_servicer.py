@@ -12,10 +12,10 @@ class FollowDatabaseServicer:
         self._db = db
         self._logger = logger
         self._follow_type_handlers = {
-            database_pb2.DbFollowRequest.INSERT: self._follow_handle_insert,
-            database_pb2.DbFollowRequest.FIND: self._follow_handle_find,
-            database_pb2.DbFollowRequest.UPDATE: self._follow_handle_update,
-            database_pb2.DbFollowRequest.DELETE: self._follow_handle_delete,
+            database_pb2.RequestType.INSERT: self._follow_handle_insert,
+            database_pb2.RequestType.FIND: self._follow_handle_find,
+            database_pb2.RequestType.UPDATE: self._follow_handle_update,
+            database_pb2.RequestType.DELETE: self._follow_handle_delete,
         }
 
     def _db_tuple_to_entry(self, tup, entry):

@@ -16,7 +16,7 @@ class SendCreateServicer:
 
     def _add_ap_id(self, global_id, ap_id):
         req = database_pb2.PostsRequest(
-            request_type=database_pb2.PostsRequest.UPDATE,
+            request_type=database_pb2.RequestType.UPDATE,
             match=database_pb2.PostsEntry(
                 global_id=global_id,
             ),

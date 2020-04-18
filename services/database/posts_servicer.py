@@ -33,10 +33,10 @@ class PostsDatabaseServicer:
             "f.followed=p.author_id AND f.follower=? "
         )
         self._type_handlers = {
-            database_pb2.PostsRequest.INSERT: self._handle_insert,
-            database_pb2.PostsRequest.FIND: self._handle_find,
-            database_pb2.PostsRequest.DELETE: self._handle_delete,
-            database_pb2.PostsRequest.UPDATE: self._handle_update,
+            database_pb2.RequestType.INSERT: self._handle_insert,
+            database_pb2.RequestType.FIND: self._handle_find,
+            database_pb2.RequestType.DELETE: self._handle_delete,
+            database_pb2.RequestType.UPDATE: self._handle_update,
         }
 
     def Posts(self, request, context):

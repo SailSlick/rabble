@@ -37,7 +37,7 @@ class UpdateHandler:
             pw = self._hash_password(request.new_password)
 
         update_request = database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.UPDATE,
+            request_type=database_pb2.RequestType.UPDATE,
             match=user,
             entry=database_pb2.UsersEntry(
                 display_name=request.display_name,

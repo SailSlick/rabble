@@ -38,7 +38,7 @@ func (s *server) getFollows(ctx context.Context, u *pb.UsersEntry) ([]*pb.Follow
 	const errorFmt = "Could not get follows for user %#v: %v"
 
 	r := &pb.DbFollowRequest{
-		RequestType: pb.DbFollowRequest_FIND,
+		RequestType: pb.RequestType_FIND,
 		Match:       &pb.Follow{Follower: u.GlobalId},
 	}
 
@@ -79,7 +79,7 @@ func (s *server) GetUserFeed(ctx context.Context, r *pb.FeedRequest) (*pb.FeedRe
 	shares := []*pb.SharesResponse{}
 	for _, f := range follows {
 		pr := &pb.PostsRequest{
-			RequestType:  pb.PostsRequest_FIND,
+			RequestType:  pb.RequestType_FIND,
 			Match:        &pb.PostsEntry{AuthorId: f.Followed},
 			UserGlobalId: r.UserGlobalId,
 		}
@@ -162,7 +162,7 @@ func (s *server) Get(ctx context.Context, r *pb.FeedRequest) (*pb.FeedResponse, 
 func (s *server) PerArticle(ctx context.Context, r *pb.ArticleRequest) (*pb.FeedResponse, error) {
 	log.Printf("In per article, ID: %d\n", r.ArticleId)
 	pr := &pb.PostsRequest{
-		RequestType:  pb.PostsRequest_FIND,
+		RequestType:  pb.RequestType_FIND,
 		UserGlobalId: r.UserGlobalId,
 		Match: &pb.PostsEntry{
 			GlobalId: r.ArticleId,
@@ -217,7 +217,7 @@ func (s *server) checkFollowing(follower_id int64, followed_id int64) (bool, err
 		return true, nil // Users are 'following' themselves.
 	}
 	fr := &pb.DbFollowRequest{
-		RequestType: pb.DbFollowRequest_FIND,
+		RequestType: pb.RequestType_FIND,
 		Match: &pb.Follow{
 			Follower: follower_id,
 			Followed: followed_id,
@@ -274,7 +274,7 @@ func (s *server) PerUser(ctx context.Context, r *pb.FeedRequest) (*pb.FeedRespon
 	}
 
 	pr := &pb.PostsRequest{
-		RequestType:  pb.PostsRequest_FIND,
+		RequestType:  pb.RequestType_FIND,
 		UserGlobalId: r.UserGlobalId,
 		Match: &pb.PostsEntry{
 			AuthorId: authorID,

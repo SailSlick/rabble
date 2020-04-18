@@ -32,7 +32,7 @@ class CreateHandler:
     def Create(self, request, context):
         public_key, private_key = self._create_public_and_private_key()
         insert_request = database_pb2.UsersRequest(
-            request_type=database_pb2.UsersRequest.INSERT,
+            request_type=database_pb2.RequestType.INSERT,
             entry=database_pb2.UsersEntry(
                 handle=request.handle,
                 display_name=request.display_name,

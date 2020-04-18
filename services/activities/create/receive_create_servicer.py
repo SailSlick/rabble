@@ -40,7 +40,7 @@ class ReceiveCreateServicer:
             follower=local_user_id
         )
         follow_req = database_pb2.DbFollowRequest(
-            request_type=database_pb2.DbFollowRequest.FIND,
+            request_type=database_pb2.RequestType.FIND,
             match=follow_entry
         )
         follow_resp = self._db_stub.Follow(follow_req)
