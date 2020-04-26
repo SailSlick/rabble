@@ -113,5 +113,5 @@ CREATE TABLE IF NOT EXISTS feed_verification (
   feed_url          string  NOT NULL,
   user_id           integer NOT NULL,
   unclaimed_user_id integer NOT NULL,
-  register_datetime integer NOT NULL,
+  register_datetime integer NOT NULL
 );

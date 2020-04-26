@@ -130,7 +130,7 @@ describe("FollowForm", () => {
         .simulate("change", {
           target: {
             name: "type",
-            value: "url",
+            value: "feed",
           },
         });
     });

@@ -16,7 +16,8 @@ function createFakeResponse(body: ISearchResponse | Error | null) {
   };
   const retry = () => ({ end });
   const set = () => ({ retry });
-  const root = { set };
+  // tslint:disable-next-line
+  const root: superagent.SuperAgentRequest = { set } as unknown as superagent.SuperAgentRequest;
   return sandbox.stub(superagent, "get").returns(root);
 }
 

@@ -56,7 +56,7 @@ describe("Feed", () => {
     const getPosts = sinon.spy(FeedBody.prototype, "getPosts");
 
     const getStub = sinon.stub(posts, "GetPublicPosts");
-    const promise = new bluebird.Promise((resolve) => {
+    const promise = new bluebird.Promise<posts.IAnyParsedPost[]>((resolve) => {
       resolve(evalidBody);
     });
     getStub.returns(promise);

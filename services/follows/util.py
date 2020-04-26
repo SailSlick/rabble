@@ -95,7 +95,7 @@ class Util:
             follow=s2s_follow,
         )
         # TODO(devoxel): Add response logic
-        print(self._approver_stub.SendApproval(req))
+        self._approver_stub.SendApproval(req)
 
     def validate_and_get_users(self, resp, request):
         """

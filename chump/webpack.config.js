@@ -2,15 +2,16 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 // Based on code in typescript documentation, licensed under Apache License 2.0
 // See https://git.io/fxCgz for a link to the documentation.
-module.exports = env => {
-  reactPostfix = "development.js"
-  if (typeof(env) != "undefined" && env.production == true) {
-    reactPostfix = "production.min.js"
-  }
 
-  const reactUnpkg = "https://unpkg.com/react@16/umd/react." + reactPostfix;
-  const reactDomUnpkg = "https://unpkg.com/react-dom@16/umd/react-dom." + reactPostfix;
-  return {
+reactPostfix = "production.min.js"
+if (process.env.TEST_RABBLE) {
+  reactPostfix = "development.js"
+}
+
+const reactUnpkg = "https://unpkg.com/react@16/umd/react." + reactPostfix;
+const reactDomUnpkg = "https://unpkg.com/react-dom@16/umd/react-dom." + reactPostfix;
+
+module.exports = {
     entry: "./src/index.tsx",
     output: {
         filename: "bundle.js",
@@ -72,5 +73,4 @@ module.exports = env => {
             ]
         })
     ]
-  }
 }

@@ -14,7 +14,8 @@ function createFakeResponse(body: IFeedResponse | Error | null) {
       cb(null, {ok: true, body });
   };
   const set = () => ({ end });
-  const root = { set };
+  // tslint:disable-next-line
+  const root: superagent.SuperAgentRequest = { set } as unknown as superagent.SuperAgentRequest;
   return sandbox.stub(superagent, "get").returns(root);
 }
 
