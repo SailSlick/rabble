@@ -1,11 +1,10 @@
-from database.follow_servicer import FollowDatabaseServicer
-from database.posts_servicer import PostsDatabaseServicer
-from database.users_servicer import UsersDatabaseServicer
-from database.like_servicer import LikeDatabaseServicer
-from database.view_servicer import ViewDatabaseServicer
-from database.log_servicer import LogDatabaseServicer
-from database.share_servicer import ShareDatabaseServicer
-from database.feed_servicer import FeedDatabaseServicer
+from database.servicers.follow_servicer import FollowDatabaseServicer
+from database.servicers.posts_servicer import PostsDatabaseServicer
+from database.servicers.users_servicer import UsersDatabaseServicer
+from database.servicers.like_servicer import LikeDatabaseServicer
+from database.servicers.view_servicer import ViewDatabaseServicer
+from database.servicers.log_servicer import LogDatabaseServicer
+from database.servicers.share_servicer import ShareDatabaseServicer
 
 from services.proto import database_pb2_grpc
 
@@ -46,5 +45,3 @@ class DatabaseServicer(database_pb2_grpc.DatabaseServicer):
         self.FindShare = share_servicer.FindShare
         self.SharedPosts = share_servicer.SharedPosts
         self.GetSharersOfPost = share_servicer.GetSharersOfPost
-        feed_servicer = FeedDatabaseServicer(db, logger)
-        self.Feeds = feed_servicer.Feeds

@@ -2,10 +2,10 @@ import unittest
 import logging
 import os
 
-import database.posts_servicer as posts_servicer
-import database.users_servicer as users_servicer
-import database.like_servicer as like_servicer
-import database.follow_servicer as follow_servicer
+import database.servicers.posts_servicer as posts_servicer
+import database.servicers.users_servicer as users_servicer
+import database.servicers.like_servicer as like_servicer
+import database.servicers.follow_servicer as follow_servicer
 import database.db as database
 from services.proto import database_pb2
 from services.proto import general_pb2

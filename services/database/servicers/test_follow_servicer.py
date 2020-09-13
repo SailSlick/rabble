@@ -2,7 +2,7 @@ import unittest
 import logging
 import os
 
-import database.follow_servicer as follow_servicer
+import database.servicers.follow_servicer as follow_servicer
 import database.db as database
 from services.proto import database_pb2
 from services.proto import general_pb2
@@ -18,13 +18,14 @@ class FollowDatabaseHelper(unittest.TestCase):
 
         def fake_context():
             def called():
-                raise NotImplemented
+                raise NotImplementedError
             return called
 
         logger = logging.getLogger()
-        self.db = database.build_database(logger,
-                                          "/repo/build_out/database/rabble_schema.sql",
-                                          FOLLOW_DB_PATH)
+        self.db = database.build_database(
+            logger,
+            "/repo/build_out/database/rabble_schema.sql",
+            FOLLOW_DB_PATH)
         self.addCleanup(clean_database)
         self.service = follow_servicer.FollowDatabaseServicer(self.db, logger)
         self.ctx = fake_context()

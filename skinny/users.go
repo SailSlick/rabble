@@ -281,8 +281,8 @@ func (s *serverWrapper) handleUserFeedUpdate() http.HandlerFunc {
 		decoder := json.NewDecoder(r.Body)
 		w.Header().Set("Content-Type", "application/json")
 
-		var req pb.FeedVerifyEntry
-		var resp pb.UpdateUserFeedResponse
+		var req pb.CreateFeedVerificationHashRequest
+		var resp pb.CreateFeedVerificationHashResponse
 		enc := json.NewEncoder(w)
 
 		globalID, err := s.getSessionGlobalID(r)
@@ -312,21 +312,34 @@ func (s *serverWrapper) handleUserFeedUpdate() http.HandlerFunc {
 
 		req.UserId = globalID
 		log.Printf("Trying to update user %#v feed.\n", globalID)
-		ctx, cancel := context.WithTimeout(context.Background(),
-																			defaultTimeoutDuration)
+		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeoutDuration)
 		defer cancel()
 
-		uResp, err := s.rss.UpdateUserFeed(ctx, &req)
+		handle, _ := s.getSessionHandle(r)
+		rssFollowReq := &pb.LocalToRss{
+			Follower: handle,
+			FeedUrl: req.FeedUrl,
+		}
+		_, err = s.follows.RssFollowRequest(ctx, rssFollowReq)
+		if err != nil {
+			log.Printf("Could not send rss follow request: %#v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			resp.Error = invalidJSONError
+			enc.Encode(resp)
+			return
+		}
+
+		uResp, err := s.users.CreateFeedVerificationHash(ctx, &req)
 		resp = *uResp
 		if err != nil {
-			log.Printf("Could not update user feed: %v", err)
-			resp.Error = "Error communicating with rss service"
+			log.Printf("Could not create feed hash: %v", err)
+			resp.Error = "Error communicating with user service"
 			w.WriteHeader(http.StatusInternalServerError)
 		} else if resp.ResultType == pb.ResultType_ERROR {
-			log.Printf("Error updating user feed: %s", resp.Error)
+			log.Printf("Could not create feed hash: %s", resp.Error)
 			w.WriteHeader(http.StatusInternalServerError)
 		} else if resp.ResultType == pb.ResultType_ERROR_400 {
-			log.Printf("Error updating user feed: %s", resp.Error)
+			log.Printf("Could not create feed hash: %s", resp.Error)
 			w.WriteHeader(http.StatusBadRequest)
 			resp.Error = invalidRequestError
 		}

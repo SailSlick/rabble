@@ -3,9 +3,7 @@ import sqlite3
 import database.util as util
 
 from services.proto import database_pb2
-from services.proto import database_pb2_grpc
 from services.proto import general_pb2
-from google.protobuf.timestamp_pb2 import Timestamp
 
 
 DEFAULT_NUM_POSTS = 50
@@ -275,9 +273,9 @@ class PostsDatabaseServicer:
         filter_clause, values = util.equivalent_filter(req.match)
         try:
             if not filter_clause:
-                res = self._db.execute('DELETE FROM posts')
+                self._db.execute('DELETE FROM posts')
             else:
-                res = self._db.execute(
+                self._db.execute(
                     'DELETE FROM posts WHERE ' + filter_clause,
                     *values)
         except sqlite3.Error as e:

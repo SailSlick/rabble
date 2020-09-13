@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Rss } from "react-feather";
 import { Link } from "react-router-dom";
 
 import * as config from "../../../rabble_config.json";
@@ -61,6 +62,13 @@ export class User extends React.Component<IUserProps, {}> {
             <div className="pure-g">
               <div className="pure-u-1">
                   <p className="author-bio">{this.props.blogUser.bio}</p>
+              </div>
+            </div>
+            <div className="pure-g">
+              <div className="pure-u-1">
+                  <a href={`/c2s/${this.props.blogUser.global_id}/rss`}>
+                    <Rss/>
+                  </a>
               </div>
             </div>
           </div>

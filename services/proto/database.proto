@@ -308,39 +308,10 @@ message FindShareResponse {
   bool exists = 3;
 }
 
-message FeedVerifyEntry {
-  int64 feed_id = 1;
-  // full url for the rss feed (without protocol)
-  string feed_url = 2;
-  // global_id of the user requesting the change if user request
-  int64 user_id = 3;
-  // global_id of the feed user if feed exists
-  int64 unclaimed_user_id = 4;
-  // Code to be entered into feed to verify ownership
-  string verification_hash = 5;
-  // Timestamp the feed was registered at
-  google.protobuf.Timestamp register_datetime = 6;
-}
-
-message FeedVerifyRequest {
-  RequestType request_type = 1;
-  FeedVerifyEntry entry = 2;
-}
-
-message FeedVerifyResponse {
-  ResultType result_type = 1;
-  string error = 2;
-
-  // If the result_type is OK, and the query returns some entries, then those
-  // entries are provided here.
-  repeated FeedVerifyEntry results = 3;
-}
-
 service Database {
   rpc Posts(PostsRequest) returns (PostsResponse);
   rpc Users(UsersRequest) returns (UsersResponse);
   rpc Follow(DbFollowRequest) returns (DbFollowResponse);
-  rpc FeedVerify(FeedVerifyRequest) returns (FeedVerifyResponse);
 
   // The likes table will require a lot of cross-table style requests,
   // this is why the RPC is in a different style.

@@ -67,14 +67,6 @@ func (s *serverWrapper) convertToProtoTimestamp(timestamp time.Time) (*tspb.Time
 	return protoTimestamp, nil
 }
 
-func (s *serverWrapper) generateVerifyHash(n int) string {
-	b := make([]byte, n)
-  for i := range b {
-      b[i] = letterBytes[rand.Intn(len(letterBytes))]
-  }
-  return string(b)
-}
-
 func (s *serverWrapper) convertRssURLToHandle(url string) string {
 	// Converts url in form: https://news.ycombinator.com/rss
 	// to: news.ycombinator.com-rss
@@ -175,57 +167,8 @@ func (s *serverWrapper) GetRssFeed(url string) (*gofeed.Feed, error) {
 	return feed, nil
 }
 
-func (s *serverWrapper) UpdateUserFeed(ctx context.Context, r *pb.FeedVerifyEntry) (*pb.UpdateUserFeedResponse, error) {
-	log.Printf("UpdateUserFeed for userId: %s, feed: %s \n", r.UserId, r.FeedUrl)
-	uufr := &pb.UpdateUserFeedResponse{}
-
-	// Check if rss feed user already exists.
-	urFind := &pb.UsersRequest {
-		RequestType: pb.RequestType_FIND,
-		Match: &pb.UsersEntry{ Rss: r.FeedUrl },
-	}
-	rssUsers, rssErr := utils.UserFind(ctx, urFind, s.db)
-	if rssErr != nil {
-		log.Printf("UpdateUserFeed rss find got: %v\n", rssErr.Error())
-		uufr.ResultType = pb.ResultType_ERROR
-		uufr.Error = rssErr.Error()
-		return uufr, nil
-	}
-	if len(rssUsers) != 0 {
-		// User with this feed already exists.
-		r.UnclaimedUserId = rssUsers[0].GlobalId
-	}
-
-	timestamp, _ := s.convertToProtoTimestamp(time.Now())
-	verifyHash := s.generateVerifyHash(20)
-	r.RegisterDatetime = timestamp
-	r.VerificationHash = verifyHash
-	// add new user with feed details
-	urInsert := &pb.FeedVerifyRequest{
-		RequestType: pb.RequestType_INSERT,
-		Entry: r,
-	}
-	insertResp, insertErr := s.db.FeedVerify(ctx, urInsert)
-
-	if insertErr != nil {
-		log.Printf("Error on feed verify insert: %v\n", insertErr)
-		uufr.ResultType = pb.ResultType_ERROR
-		uufr.Error = insertErr.Error()
-		return uufr, nil
-	} else if insertResp.ResultType != pb.ResultType_OK {
-		log.Printf("Feed verify insert failed. message: %v\n", insertResp.Error)
-		uufr.ResultType = insertResp.ResultType
-		uufr.Error = insertResp.Error
-		return uufr, nil
-	}
-
-	uufr.ResultType = pb.ResultType_OK
-	uufr.VerificationHash = verifyHash
-	return uufr, nil
-}
-
 func (s *serverWrapper) PerUserRss(ctx context.Context, r *pb.UsersEntry) (*pb.RssResponse, error) {
-	log.Printf("Got a per user request for user id: %s\n", r.GlobalId)
+	log.Printf("Got a per user request for user id: %v\n", r.GlobalId)
 	rssr := &pb.RssResponse{}
 
 	// Get user details
@@ -238,7 +181,7 @@ func (s *serverWrapper) PerUserRss(ctx context.Context, r *pb.UsersEntry) (*pb.R
 	}
 
 	if ue.Private != nil && ue.Private.Value {
-		log.Printf("id: %s is a private user.\n", r.GlobalId)
+		log.Printf("id: %v is a private user.\n", r.GlobalId)
 		rssr.ResultType = pb.ResultType_ERROR_401
 		rssr.Message = "Can not create RSS feed for private user."
 		return rssr, nil

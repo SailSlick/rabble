@@ -27,16 +27,7 @@ message RssResponse {
     string feed = 3;
 }
 
-message UpdateUserFeedResponse {
-    ResultType result_type = 1;
-
-    // Should only be set if result_type is not OK.
-    string error = 2;
-    string verification_hash = 3;
-}
-
 service RSS {
   rpc NewRssFollow(NewRssFeed) returns (NewRssFeedResponse);
   rpc PerUserRss(UsersEntry) returns (RssResponse);
-  rpc UpdateUserFeed(FeedVerifyEntry) returns (UpdateUserFeedResponse);
 }

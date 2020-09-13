@@ -62,9 +62,25 @@ message GetCssResponse {
   string css = 3;
 }
 
+message CreateFeedVerificationHashRequest {
+  // full url for the rss feed (without protocol)
+  string feed_url = 1;
+  // global_id of the user requesting the change if user request
+  int64 user_id = 2;
+}
+
+message CreateFeedVerificationHashResponse {
+    ResultType result_type = 1;
+
+    // Should only be set if result_type is not OK.
+    string error = 2;
+    string verification_hash = 3;
+}
+
 service Users {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Create(CreateUserRequest) returns (CreateUserResponse);
   rpc Update(UpdateUserRequest) returns (UpdateUserResponse);
   rpc GetCss(GetCssRequest) returns (GetCssResponse);
+  rpc CreateFeedVerificationHash(CreateFeedVerificationHashRequest) returns (CreateFeedVerificationHashResponse);
 }

@@ -61,7 +61,7 @@ export class LikeButton extends RootComponent<ILikeButtonProps, ILikeButtonState
         className="pure-button pure-input-1-3 pure-button-primary primary-button"
         onClick={this.handleClick}
       >
-        {this.state.likesCount} <ThumbsUp/> {config.unlike}
+        {this.state.likesCount} <ThumbsDown/> {config.unlike}
       </button>
     );
   }
